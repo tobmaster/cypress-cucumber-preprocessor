@@ -1,5 +1,13 @@
 Feature:  unambiguous step definitions
 
+  Background:
+    Given additional preprocessor configuration
+      """
+      {
+        "experimentalSourceMap": true
+      }
+      """
+
   Scenario: step matching two definitions
     Given a file named "cypress/integration/a.feature" with:
       """

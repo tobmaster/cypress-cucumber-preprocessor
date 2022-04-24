@@ -74,6 +74,7 @@ export async function compile(
     const registry = withRegistry(
       ${stringify(configuration.projectRoot)},
       ${stringify(sourcesRelativeTo)},
+      ${preprocessor.experimentalSourceMap},
       () => {
         ${stepDefinitions
           .map((stepDefintion) => `require(${stringify(stepDefintion)});`)

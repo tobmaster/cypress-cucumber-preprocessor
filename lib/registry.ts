@@ -28,44 +28,12 @@ import {
   IStepDefinitionBody,
 } from "./types";
 
-// require("source-map-support").install();
-
-function getErrorSource(stack: string) {
-  var match = /\n    at [^(]+ \((.*):(\d+):(\d+)\)/.exec(stack);
-  if (match) {
-    return match[1];
-  } else {
-    throw new Error("Unable to retrieve source!");
-  }
-}
-
-function retrieveSourceMapURL(source: string) {
-  let fileData: string;
-
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", source, /** async */ false);
-  xhr.send(null);
-
-  if (xhr.readyState === 4 && xhr.status === 200) {
-    fileData = xhr.responseText;
-  } else {
-    return;
-  }
-
-  var re =
-    /(?:\/\/[@#][\s]*sourceMappingURL=([^\s'"]+)[\s]*$)|(?:\/\*[@#][\s]*sourceMappingURL=([^\s*'"]+)[\s]*(?:\*\/)[\s]*$)/gm;
-  // Keep executing the search to find the *last* sourceMappingURL to avoid
-  // picking up sourceMappingURLs from comments, strings, etc.
-  var lastMatch, match;
-  while ((match = re.exec(fileData))) lastMatch = match;
-  if (!lastMatch) return;
-  return lastMatch[1];
-}
+import { Position, retrievePositionFromSourceMap } from "./source-map";
 
 interface IStepDefinition<T extends unknown[]> {
   expression: Expression;
   implementation: IStepDefinitionBody<T>;
-  position: Position;
+  position?: Position;
 }
 
 export type HookKeyword = "Before" | "After";
@@ -92,19 +60,13 @@ function parseHookArguments(
   };
 }
 
-interface Position {
-  line: number;
-  column: number;
-  source: string;
-}
-
 export class Registry {
   private parameterTypeRegistry: ParameterTypeRegistry;
 
   private preliminaryStepDefinitions: {
     description: string | RegExp;
     implementation: () => void;
-    position: Position;
+    position?: Position;
   }[] = [];
 
   private stepDefinitions: IStepDefinition<unknown[]>[] = [];
@@ -113,7 +75,11 @@ export class Registry {
 
   public afterHooks: IHook[] = [];
 
-  constructor(private projectRoot: string, private sourcesRelativeTo: string) {
+  constructor(
+    private projectRoot: string,
+    private sourcesRelativeTo: string,
+    private experimentalSourceMap: boolean
+  ) {
     this.defineStep = this.defineStep.bind(this);
     this.runStepDefininition = this.runStepDefininition.bind(this);
     this.defineParameterType = this.defineParameterType.bind(this);
@@ -149,42 +115,14 @@ export class Registry {
   }
 
   public defineStep(description: string | RegExp, implementation: () => void) {
-    const stack = ErrorStackParser.parse(new Error());
+    let position: Position | undefined;
 
-    // console.log(stack);
-
-    const sourceMappingURL = assertAndReturn(
-      retrieveSourceMapURL(stack[0].fileName!),
-      "LOL"
-    );
-
-    const rawSourceMap = JSON.parse(
-      new TextDecoder().decode(
-        toByteArray(sourceMappingURL.slice(sourceMappingURL.indexOf(",") + 1))
-      )
-    );
-
-    console.log(rawSourceMap);
-
-    const sourceMap = new SourceMapConsumer(rawSourceMap);
-
-    const relevantFrame = stack[2];
-
-    const position = sourceMap.originalPositionFor({
-      line: relevantFrame.getLineNumber()!,
-      column: relevantFrame.getColumnNumber()!,
-    });
-
-    console.log({ relevantFrame, position });
-
-    // console.log(rawSourceMap.sourceRoot);
-
-    position.source = path.relative(
-      this.projectRoot,
-      path.join(path.dirname(this.sourcesRelativeTo), position.source)
-    );
-
-    console.log(position);
+    if (this.experimentalSourceMap) {
+      position = retrievePositionFromSourceMap(
+        this.projectRoot,
+        this.sourcesRelativeTo
+      );
+    }
 
     if (typeof description !== "string" && !(description instanceof RegExp)) {
       throw new Error("Unexpected argument for step definition");
@@ -234,10 +172,16 @@ export class Registry {
           matchingStepDefinitions
             .map((stepDefinition) => {
               const { expression } = stepDefinition;
-              if (expression instanceof RegularExpression) {
-                return ` ${expression.regexp} - ${stepDefinition.position.source}:${stepDefinition.position.line}`;
-              } else if (expression instanceof CucumberExpression) {
-                return ` ${expression.source} - ${stepDefinition.position.source}:${stepDefinition.position.line}`;
+
+              const stringExpression =
+                expression instanceof RegularExpression
+                  ? String(expression.regexp)
+                  : expression.source;
+
+              if (stepDefinition.position) {
+                return ` ${stringExpression} - ${stepDefinition.position.source}:${stepDefinition.position.line}`;
+              } else {
+                return ` ${stringExpression}`;
               }
             })
             .join("\n")
@@ -296,9 +240,14 @@ const globalPropertyName =
 export function withRegistry(
   projectRoot: string,
   sourcesRelativeTo: string,
+  experimentalSourceMap: boolean,
   fn: () => void
 ): Registry {
-  const registry = new Registry(projectRoot, sourcesRelativeTo);
+  const registry = new Registry(
+    projectRoot,
+    sourcesRelativeTo,
+    experimentalSourceMap
+  );
   assignRegistry(registry);
   fn();
   freeRegistry();

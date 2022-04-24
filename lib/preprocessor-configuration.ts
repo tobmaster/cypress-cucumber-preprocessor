@@ -118,6 +118,16 @@ function validateConfigurationEntry(
       }
       return { [key]: value };
     }
+    case "experimentalSourceMap": {
+      if (!isBoolean(value)) {
+        throw new Error(
+          `Expected a boolean (experimentalSourceMap), but got ${util.inspect(
+            value
+          )}`
+        );
+      }
+      return { [key]: value };
+    }
     default:
       return {};
   }
@@ -136,6 +146,7 @@ export interface IPreprocessorConfiguration {
   };
   readonly filterSpecs?: boolean;
   readonly omitFiltered?: boolean;
+  readonly experimentalSourceMap?: boolean;
 }
 
 export class PreprocessorConfiguration implements IPreprocessorConfiguration {
@@ -175,6 +186,10 @@ export class PreprocessorConfiguration implements IPreprocessorConfiguration {
 
   get omitFiltered() {
     return this.explicitValues.omitFiltered ?? false;
+  }
+
+  get experimentalSourceMap() {
+    return this.explicitValues.experimentalSourceMap ?? false;
   }
 }
 
