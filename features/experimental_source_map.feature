@@ -11,12 +11,6 @@ Feature: experimental source map
         "experimentalSourceMap": true
       }
       """
-    And additional Cypress configuration
-      """
-      {
-        "screenshotOnRunFailure": false
-      }
-      """
 
   Rule: it should work with esbuild
 
@@ -81,3 +75,4 @@ Feature: experimental source map
       When I run cypress
       Then it passes
       And there should be a JSON output similar to "fixtures/experimental-source-map.json"
+

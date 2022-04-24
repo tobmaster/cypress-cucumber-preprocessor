@@ -20,9 +20,10 @@ import {
   IStepDefinitionBody,
 } from "./types";
 
-import { Position, retrievePositionFromSourceMap } from "./source-map";
+import { maybeRetrievePositionFromSourceMap, Position } from "./source-map";
 
 interface IStepDefinition<T extends unknown[]> {
+  id: string;
   expression: Expression;
   implementation: IStepDefinitionBody<T>;
   position?: Position;
@@ -35,6 +36,7 @@ export interface IHook {
   node: ReturnType<typeof parse>;
   implementation: IHookBody;
   keyword: HookKeyword;
+  position?: Position;
 }
 
 const noopNode = { evaluate: () => true };
@@ -42,13 +44,15 @@ const noopNode = { evaluate: () => true };
 function parseHookArguments(
   options: { tags?: string },
   fn: IHookBody,
-  keyword: HookKeyword
+  keyword: HookKeyword,
+  position?: Position
 ): IHook {
   return {
     id: uuid(),
     node: options.tags ? parse(options.tags) : noopNode,
     implementation: fn,
     keyword,
+    position,
   };
 }
 
@@ -61,7 +65,7 @@ export class Registry {
     position?: Position;
   }[] = [];
 
-  private stepDefinitions: IStepDefinition<unknown[]>[] = [];
+  public stepDefinitions: IStepDefinition<unknown[]>[] = [];
 
   public beforeHooks: IHook[] = [];
 
@@ -86,6 +90,7 @@ export class Registry {
       .preliminaryStepDefinitions) {
       if (typeof description === "string") {
         this.stepDefinitions.push({
+          id: uuid(),
           expression: new CucumberExpression(
             description,
             this.parameterTypeRegistry
@@ -95,6 +100,7 @@ export class Registry {
         });
       } else {
         this.stepDefinitions.push({
+          id: uuid(),
           expression: new RegularExpression(
             description,
             this.parameterTypeRegistry
@@ -109,12 +115,11 @@ export class Registry {
   public defineStep(description: string | RegExp, implementation: () => void) {
     let position: Position | undefined;
 
-    if (this.experimentalSourceMap) {
-      position = retrievePositionFromSourceMap(
-        this.projectRoot,
-        this.sourcesRelativeTo
-      );
-    }
+    position = maybeRetrievePositionFromSourceMap(
+      this.projectRoot,
+      this.sourcesRelativeTo,
+      this.experimentalSourceMap
+    );
 
     if (typeof description !== "string" && !(description instanceof RegExp)) {
       throw new Error("Unexpected argument for step definition");
@@ -138,11 +143,33 @@ export class Registry {
   }
 
   public defineBefore(options: { tags?: string }, fn: IHookBody) {
-    this.beforeHooks.push(parseHookArguments(options, fn, "Before"));
+    this.beforeHooks.push(
+      parseHookArguments(
+        options,
+        fn,
+        "Before",
+        maybeRetrievePositionFromSourceMap(
+          this.projectRoot,
+          this.sourcesRelativeTo,
+          this.experimentalSourceMap
+        )
+      )
+    );
   }
 
   public defineAfter(options: { tags?: string }, fn: IHookBody) {
-    this.afterHooks.push(parseHookArguments(options, fn, "After"));
+    this.afterHooks.push(
+      parseHookArguments(
+        options,
+        fn,
+        "After",
+        maybeRetrievePositionFromSourceMap(
+          this.projectRoot,
+          this.sourcesRelativeTo,
+          this.experimentalSourceMap
+        )
+      )
+    );
   }
 
   private resolveStepDefintion(text: string) {

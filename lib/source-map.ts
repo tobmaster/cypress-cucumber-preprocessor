@@ -99,3 +99,13 @@ export function retrievePositionFromSourceMap(
 
   return position;
 }
+
+export function maybeRetrievePositionFromSourceMap(
+  projectRoot: string,
+  sourcesRelativeTo: string,
+  experimentalSourceMap: boolean
+): Position | undefined {
+  if (experimentalSourceMap) {
+    return retrievePositionFromSourceMap(projectRoot, sourcesRelativeTo);
+  }
+}
