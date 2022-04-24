@@ -63,8 +63,7 @@ Before({ tags: "not @no-default-plugin" }, async function () {
         on(
           "file:preprocessor",
           createBundler({
-            plugins: [createEsbuildPlugin(config)],
-            sourcemap: "inline"
+            plugins: [createEsbuildPlugin(config)]
           })
         );
 

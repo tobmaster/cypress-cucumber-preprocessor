@@ -6,8 +6,6 @@ import ErrorStackParser from "error-stack-parser";
 
 import { SourceMapConsumer } from "source-map";
 
-import { assertAndReturn } from "./assertions";
-
 export interface Position {
   line: number;
   column: number;

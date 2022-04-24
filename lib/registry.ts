@@ -10,14 +10,6 @@ import parse from "@cucumber/tag-expressions";
 
 import { v4 as uuid } from "uuid";
 
-import ErrorStackParser from "error-stack-parser";
-
-import { SourceMapConsumer } from "source-map";
-
-import { toByteArray } from "base64-js";
-
-import path from "path-browserify";
-
 import { assertAndReturn } from "./assertions";
 
 import DataTable from "./data_table";

@@ -1,13 +1,5 @@
 Feature:  unambiguous step definitions
 
-  Background:
-    Given additional preprocessor configuration
-      """
-      {
-        "experimentalSourceMap": true
-      }
-      """
-
   Scenario: step matching two definitions
     Given a file named "cypress/integration/a.feature" with:
       """
@@ -26,6 +18,6 @@ Feature:  unambiguous step definitions
     And the output should contain
       """
       Multiple matching step definitions for: a step
-       a step - cypress/support/step_definitions/steps.js:2
-       /a step/ - cypress/support/step_definitions/steps.js:3
+       a step
+       /a step/
       """
