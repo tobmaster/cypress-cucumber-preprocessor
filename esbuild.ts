@@ -3,6 +3,7 @@ import esbuild from "esbuild";
 import { ICypressConfiguration } from "@badeball/cypress-configuration";
 
 import { compile } from "./lib/template";
+import { assertAndReturn } from "./lib/assertions";
 
 export { ICypressConfiguration };
 
@@ -18,7 +19,15 @@ export function createEsbuildPlugin(
         const content = await fs.promises.readFile(args.path, "utf8");
 
         return {
-          contents: await compile(configuration, content, args.path),
+          contents: await compile(
+            configuration,
+            content,
+            args.path,
+            assertAndReturn(
+              build.initialOptions.outfile,
+              "Expected to find 'outfile'"
+            )
+          ),
           loader: "js",
         };
       });

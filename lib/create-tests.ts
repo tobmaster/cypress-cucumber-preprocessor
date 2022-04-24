@@ -43,6 +43,8 @@ interface CompositionContext {
     enabled: boolean;
     stack: messages.IEnvelope[];
   };
+  sourcesRelativeTo: string;
+  projectRoot: string;
 }
 
 /**
@@ -512,7 +514,9 @@ export default function createTests(
   gherkinDocument: messages.IGherkinDocument,
   pickles: messages.IPickle[],
   messagesEnabled: boolean,
-  omitFiltered: boolean
+  omitFiltered: boolean,
+  projectRoot: string,
+  sourcesRelativeTo: string
 ) {
   const noopNode = { evaluate: () => true };
   const environmentTags = getTags(Cypress.env());
@@ -564,6 +568,8 @@ export default function createTests(
           enabled: messagesEnabled,
           stack: messages,
         },
+        sourcesRelativeTo,
+        projectRoot,
       },
       gherkinDocument.feature
     );

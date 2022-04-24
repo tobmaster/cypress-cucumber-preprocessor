@@ -17,7 +17,7 @@ Feature:  unambiguous step definitions
     Then it fails
     And the output should contain
       """
-      Error: Multiple matching step definitions for: a step
-       a step
-       /a step/
+      Multiple matching step definitions for: a step
+       a step - cypress/support/step_definitions/steps.js:2
+       /a step/ - cypress/support/step_definitions/steps.js:3
       """

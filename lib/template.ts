@@ -20,7 +20,8 @@ export async function compile(
   this: any,
   configuration: ICypressConfiguration,
   data: string,
-  uri: string = this.resourcePath
+  uri: string = this.resourcePath,
+  sourcesRelativeTo: string
 ) {
   const options = {
     includeSource: false,
@@ -70,11 +71,15 @@ export async function compile(
     const { default: createTests } = require(${createTestsPath});
     const { withRegistry } = require(${registryPath});
 
-    const registry = withRegistry(() => {
-      ${stepDefinitions
-        .map((stepDefintion) => `require(${stringify(stepDefintion)});`)
-        .join("\n    ")}
-    });
+    const registry = withRegistry(
+      ${stringify(configuration.projectRoot)},
+      ${stringify(sourcesRelativeTo)},
+      () => {
+        ${stepDefinitions
+          .map((stepDefintion) => `require(${stringify(stepDefintion)});`)
+          .join("\n    ")}
+      }
+    );
 
     registry.finalize();
 

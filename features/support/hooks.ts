@@ -56,6 +56,8 @@ Before({ tags: "not @no-default-plugin" }, async function () {
       const { addCucumberPreprocessorPlugin } = require("@badeball/cypress-cucumber-preprocessor");
       const { createEsbuildPlugin } = require("@badeball/cypress-cucumber-preprocessor/esbuild");
       const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
+      const { NodeModulesPolyfillPlugin } = require("@esbuild-plugins/node-modules-polyfill");
+      const { NodeGlobalsPolyfillPlugin } = require("@esbuild-plugins/node-globals-polyfill");
 
       module.exports = async (on, config) => {
         await addCucumberPreprocessorPlugin(on, config);
@@ -63,7 +65,8 @@ Before({ tags: "not @no-default-plugin" }, async function () {
         on(
           "file:preprocessor",
           createBundler({
-            plugins: [createEsbuildPlugin(config)]
+            plugins: [createEsbuildPlugin(config)],
+            sourcemap: "inline"
           })
         );
 

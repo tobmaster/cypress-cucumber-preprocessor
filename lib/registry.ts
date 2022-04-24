@@ -10,6 +10,14 @@ import parse from "@cucumber/tag-expressions";
 
 import { v4 as uuid } from "uuid";
 
+import ErrorStackParser from "error-stack-parser";
+
+import { SourceMapConsumer } from "source-map";
+
+import { toByteArray } from "base64-js";
+
+import path from "path-browserify";
+
 import { assertAndReturn } from "./assertions";
 
 import DataTable from "./data_table";
@@ -20,9 +28,44 @@ import {
   IStepDefinitionBody,
 } from "./types";
 
+// require("source-map-support").install();
+
+function getErrorSource(stack: string) {
+  var match = /\n    at [^(]+ \((.*):(\d+):(\d+)\)/.exec(stack);
+  if (match) {
+    return match[1];
+  } else {
+    throw new Error("Unable to retrieve source!");
+  }
+}
+
+function retrieveSourceMapURL(source: string) {
+  let fileData: string;
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", source, /** async */ false);
+  xhr.send(null);
+
+  if (xhr.readyState === 4 && xhr.status === 200) {
+    fileData = xhr.responseText;
+  } else {
+    return;
+  }
+
+  var re =
+    /(?:\/\/[@#][\s]*sourceMappingURL=([^\s'"]+)[\s]*$)|(?:\/\*[@#][\s]*sourceMappingURL=([^\s*'"]+)[\s]*(?:\*\/)[\s]*$)/gm;
+  // Keep executing the search to find the *last* sourceMappingURL to avoid
+  // picking up sourceMappingURLs from comments, strings, etc.
+  var lastMatch, match;
+  while ((match = re.exec(fileData))) lastMatch = match;
+  if (!lastMatch) return;
+  return lastMatch[1];
+}
+
 interface IStepDefinition<T extends unknown[]> {
   expression: Expression;
   implementation: IStepDefinitionBody<T>;
+  position: Position;
 }
 
 export type HookKeyword = "Before" | "After";
@@ -49,12 +92,19 @@ function parseHookArguments(
   };
 }
 
+interface Position {
+  line: number;
+  column: number;
+  source: string;
+}
+
 export class Registry {
   private parameterTypeRegistry: ParameterTypeRegistry;
 
   private preliminaryStepDefinitions: {
     description: string | RegExp;
     implementation: () => void;
+    position: Position;
   }[] = [];
 
   private stepDefinitions: IStepDefinition<unknown[]>[] = [];
@@ -63,7 +113,7 @@ export class Registry {
 
   public afterHooks: IHook[] = [];
 
-  constructor() {
+  constructor(private projectRoot: string, private sourcesRelativeTo: string) {
     this.defineStep = this.defineStep.bind(this);
     this.runStepDefininition = this.runStepDefininition.bind(this);
     this.defineParameterType = this.defineParameterType.bind(this);
@@ -74,7 +124,7 @@ export class Registry {
   }
 
   public finalize() {
-    for (const { description, implementation } of this
+    for (const { description, implementation, position } of this
       .preliminaryStepDefinitions) {
       if (typeof description === "string") {
         this.stepDefinitions.push({
@@ -83,6 +133,7 @@ export class Registry {
             this.parameterTypeRegistry
           ),
           implementation,
+          position,
         });
       } else {
         this.stepDefinitions.push({
@@ -91,12 +142,50 @@ export class Registry {
             this.parameterTypeRegistry
           ),
           implementation,
+          position,
         });
       }
     }
   }
 
   public defineStep(description: string | RegExp, implementation: () => void) {
+    const stack = ErrorStackParser.parse(new Error());
+
+    // console.log(stack);
+
+    const sourceMappingURL = assertAndReturn(
+      retrieveSourceMapURL(stack[0].fileName!),
+      "LOL"
+    );
+
+    const rawSourceMap = JSON.parse(
+      new TextDecoder().decode(
+        toByteArray(sourceMappingURL.slice(sourceMappingURL.indexOf(",") + 1))
+      )
+    );
+
+    console.log(rawSourceMap);
+
+    const sourceMap = new SourceMapConsumer(rawSourceMap);
+
+    const relevantFrame = stack[2];
+
+    const position = sourceMap.originalPositionFor({
+      line: relevantFrame.getLineNumber()!,
+      column: relevantFrame.getColumnNumber()!,
+    });
+
+    console.log({ relevantFrame, position });
+
+    // console.log(rawSourceMap.sourceRoot);
+
+    position.source = path.relative(
+      this.projectRoot,
+      path.join(path.dirname(this.sourcesRelativeTo), position.source)
+    );
+
+    console.log(position);
+
     if (typeof description !== "string" && !(description instanceof RegExp)) {
       throw new Error("Unexpected argument for step definition");
     }
@@ -104,6 +193,7 @@ export class Registry {
     this.preliminaryStepDefinitions.push({
       description,
       implementation,
+      position,
     });
   }
 
@@ -133,15 +223,21 @@ export class Registry {
     if (matchingStepDefinitions.length === 0) {
       throw new Error(`Step implementation missing for: ${text}`);
     } else if (matchingStepDefinitions.length > 1) {
+      console.log(
+        matchingStepDefinitions.map((step) => {
+          return step.position;
+        })
+      );
+
       throw new Error(
         `Multiple matching step definitions for: ${text}\n` +
           matchingStepDefinitions
             .map((stepDefinition) => {
               const { expression } = stepDefinition;
               if (expression instanceof RegularExpression) {
-                return ` ${expression.regexp}`;
+                return ` ${expression.regexp} - ${stepDefinition.position.source}:${stepDefinition.position.line}`;
               } else if (expression instanceof CucumberExpression) {
-                return ` ${expression.source}`;
+                return ` ${expression.source} - ${stepDefinition.position.source}:${stepDefinition.position.line}`;
               }
             })
             .join("\n")
@@ -197,8 +293,12 @@ declare global {
 const globalPropertyName =
   "__cypress_cucumber_preprocessor_registry_dont_use_this";
 
-export function withRegistry(fn: () => void): Registry {
-  const registry = new Registry();
+export function withRegistry(
+  projectRoot: string,
+  sourcesRelativeTo: string,
+  fn: () => void
+): Registry {
+  const registry = new Registry(projectRoot, sourcesRelativeTo);
   assignRegistry(registry);
   fn();
   freeRegistry();
