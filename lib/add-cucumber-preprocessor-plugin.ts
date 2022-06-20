@@ -99,7 +99,8 @@ export async function afterRunHandler(config: Cypress.PluginConfigOptions) {
     const json = await fs.open(jsonPath, "w");
 
     try {
-      const child = child_process.spawn(preprocessor.json.formatter, {
+      const [executable, ...args] = preprocessor.json.formatter.split(' ');
+      const child = child_process.spawn(executable, args, {
         stdio: [messages.fd, json.fd, "inherit"],
       });
 
