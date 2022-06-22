@@ -67,6 +67,18 @@ function validateConfigurationEntry(
           `Expected an object (json), but got ${util.inspect(value)}`
         );
       }
+      let args: string[] | undefined;
+      if (hasOwnProperty(value, "args")) {
+        if (Array.isArray(value.args) && value.args.every(isString)) {
+          args = value.args;
+        } else {
+          throw new Error(
+            `Expected an array of strings (json.args), but got ${
+              util.inspect(value)
+            }`
+          )
+        }
+      }
       if (
         !hasOwnProperty(value, "enabled") ||
         typeof value.enabled !== "boolean"
@@ -96,6 +108,7 @@ function validateConfigurationEntry(
         }
       }
       const messagesConfig = {
+        args,
         enabled: value.enabled,
         formatter,
         output,
@@ -168,6 +181,20 @@ function validateEnvironmentOverrides(
         `Expected a string (messagesOutput), but got ${util.inspect(
           messagesOutput
         )}`
+      );
+    }
+  }
+
+  if (hasOwnProperty(environment, "jsonArgs")) {
+    let { jsonArgs } = environment;
+    if (isString(jsonArgs)) {
+      jsonArgs = JSON.parse(jsonArgs);
+    }
+    if (Array.isArray(jsonArgs) && jsonArgs.every(isString)) {
+      overrides.jsonArgs = jsonArgs;
+    } else {
+      throw new Error(
+        `Expected a string array (jsonArgs), but got ${util.inspect(jsonArgs)}`
       );
     }
   }
@@ -266,6 +293,7 @@ export interface IPreprocessorConfiguration {
     output?: string;
   };
   readonly json?: {
+    args?: string[];
     enabled: boolean;
     formatter?: string;
     output?: string;
@@ -278,6 +306,7 @@ export interface IEnvironmentOverrides {
   stepDefinitions?: string | string[];
   messagesEnabled?: boolean;
   messagesOutput?: string;
+  jsonArgs?: string[];
   jsonEnabled?: boolean;
   jsonFormatter?: string;
   jsonOutput?: string;
@@ -326,6 +355,10 @@ export class PreprocessorConfiguration implements IPreprocessorConfiguration {
 
   get json() {
     return {
+      args:
+        this.environmentOverrides.jsonArgs ??
+        this.explicitValues.json?.args ??
+        [],
       enabled:
         this.environmentOverrides.jsonEnabled ??
         this.explicitValues.json?.enabled ??
