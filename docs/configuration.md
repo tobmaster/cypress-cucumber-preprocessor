@@ -54,4 +54,4 @@ Every configuration option has a similar key which can be use to override it, sh
 
 ## Test configuration
 
-Some of Cypress' [configuration options](https://docs.cypress.io/guides/references/configuration) can be overridden per-test, [Test configuration](test-configuration.md).
+Some of Cypress' [configuration options](https://docs.cypress.io/guides/references/configuration) can be overridden per-test, see [Test configuration](test-configuration.md).
