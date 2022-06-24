@@ -73,10 +73,10 @@ function validateConfigurationEntry(
           args = value.args;
         } else {
           throw new Error(
-            `Expected an array of strings (json.args), but got ${
-              util.inspect(value)
-            }`
-          )
+            `Expected an array of strings (json.args), but got ${util.inspect(
+              value
+            )}`
+          );
         }
       }
       if (
@@ -188,7 +188,19 @@ function validateEnvironmentOverrides(
   if (hasOwnProperty(environment, "jsonArgs")) {
     let { jsonArgs } = environment;
     if (isString(jsonArgs)) {
-      jsonArgs = JSON.parse(jsonArgs);
+      try {
+        jsonArgs = JSON.parse(jsonArgs);
+      } catch (err) {
+        let parseErrorMessage = "";
+        if (err instanceof Error) {
+          parseErrorMessage = `JSON.parse(jsonArgs) failed with message:\n${err.message}`;
+        }
+        throw new Error(
+          `Expected valid JSON (jsonArgs), but got ${util.inspect(
+            jsonArgs
+          )}\n${parseErrorMessage}`
+        );
+      }
     }
     if (Array.isArray(jsonArgs) && jsonArgs.every(isString)) {
       overrides.jsonArgs = jsonArgs;
