@@ -8,7 +8,11 @@ import assert from "assert";
 
 import isPathInside from "is-path-inside";
 
-import { ICypressConfiguration } from "@badeball/cypress-configuration";
+import {
+  ICypressConfiguration,
+  ICypressPost10Configuration,
+  ICypressPre10Configuration,
+} from "@badeball/cypress-configuration";
 
 import debug from "./debug";
 
@@ -17,10 +21,6 @@ import {
   DEFAULT_PRE_10_STEP_DEFINITIONS,
   IPreprocessorConfiguration,
 } from "./preprocessor-configuration";
-import {
-  ICypressPost10Configuration,
-  ICypressPre10Configuration,
-} from "@badeball/cypress-configuration/lib/cypress-configuration";
 
 import { ensureIsAbsolute, ensureIsRelative } from "./helpers";
 

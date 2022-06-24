@@ -18,11 +18,7 @@ export default defineConfig({
 });
 ```
 
-Configure your preferred bundler to process features files, with examples for
-
-* [Browserify](../examples/browserify)
-* [Webpack](../examples/webpack)
-* [Esbuild](../examples/esbuild)
+Then configure your preferred bundler to process features files. See [examples/](../examples) for how-to using Browserify, Esbuild or Webpack. Esbuild is the recommended bundler if you have no particular requirements (it's by far the fastest).
 
 Read more about configuration options at [docs/configuration.md](configuration.md).
 
