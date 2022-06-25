@@ -5,8 +5,8 @@ Feature: JSON config
     And a file named "assert_args_and_exec.js" with:
       """
       const assert = require("assert/strict");
-      assert(process.argv[0].endsWith("node"));
-      assert(process.argv[1].endsWith("assert_args_and_exec.js"));
+      assert.match(process.argv[0], /node$/);
+      assert.match(process.argv[1], /assert_args_and_exec\.js$/);
       assert.equal(process.argv[2], "cucumber-json-formatter");
       require("child_process").execSync(process.argv[2], { stdio: "inherit" });
       """
