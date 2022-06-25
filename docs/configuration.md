@@ -48,6 +48,7 @@ Every configuration option has a similar key which can be use to override it, sh
 | `messages.output`  | `messagesOutput`  | `cucumber-messages.ndjson`               |
 | `json.enabled`     | `jsonEnabled`     | `true`, `false`                          |
 | `json.formatter`   | `jsonFormatter`   | `/usr/bin/cucumber-json-formatter`       |
+| `json.args     `   | `jsonArgs     `   | `["custom-json-formatter.js"]`           |
 | `json.output`      | `jsonOutput`      | `cucumber-report.json`                   |
 | `filterSpecs`      | `filterSpecs`     | `true`, `false`                          |
 | `omitFiltered`     | `omitFiltered`    | `true`, `false`                          |
