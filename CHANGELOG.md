@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v11.3.0
+
+- Enable configuring of JSON args, allowing for custom JSON formatters, fixes [#742](https://github.com/badeball/cypress-cucumber-preprocessor/pull/742).
+
 ## v11.2.0
 
 - Enable `*.mjs` file extension by default, when looking for step definitions.
