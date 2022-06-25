@@ -188,19 +188,7 @@ function validateEnvironmentOverrides(
   if (hasOwnProperty(environment, "jsonArgs")) {
     let { jsonArgs } = environment;
     if (isString(jsonArgs)) {
-      try {
-        jsonArgs = JSON.parse(jsonArgs);
-      } catch (err) {
-        let parseErrorMessage = "";
-        if (err instanceof Error) {
-          parseErrorMessage = `JSON.parse(jsonArgs) failed with message:\n${err.message}`;
-        }
-        throw new Error(
-          `Expected valid JSON (jsonArgs), but got ${util.inspect(
-            jsonArgs
-          )}\n${parseErrorMessage}`
-        );
-      }
+      overrides.jsonArgs = [jsonArgs];
     }
     if (Array.isArray(jsonArgs) && jsonArgs.every(isString)) {
       overrides.jsonArgs = jsonArgs;
