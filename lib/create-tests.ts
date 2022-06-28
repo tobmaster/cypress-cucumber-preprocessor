@@ -735,7 +735,7 @@ export default function createTests(
      * Repopulate internal properties in case previous test is retried.
      */
     properties.testCaseStartedId = uuid();
-    properties.remainingSteps = properties.allSteps;
+    properties.remainingSteps = [...properties.allSteps];
   });
 
   after(function () {
