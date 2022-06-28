@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v11.3.1
+
+- Retried test would eventually yield "No commands were issued in the test", fixes [#749](https://github.com/badeball/cypress-cucumber-preprocessor/issues/749).
+
 ## v11.3.0
 
 - Enable configuring of JSON args, allowing for custom JSON formatters, fixes [#742](https://github.com/badeball/cypress-cucumber-preprocessor/pull/742).
