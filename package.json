@@ -29,7 +29,7 @@
     "webpack.d.ts"
   ],
   "scripts": {
-    "clean": "rm {browserify,esbuild,methods,webpack}.{js,d.ts} && bash -O globstar -c 'rm lib/**/*.{js,d.ts} test/**/*.{js,d.ts}'",
+    "clean": "rm -f {browserify,esbuild,methods,webpack}.{js,d.ts} && bash -O globstar -c 'rm -f lib/**/*.{js,d.ts} test/**/*.{js,d.ts}'",
     "build": "tsc",
     "watch": "tsc --watch",
     "fmt": "prettier --ignore-path .gitignore --write '**/*.ts'",
