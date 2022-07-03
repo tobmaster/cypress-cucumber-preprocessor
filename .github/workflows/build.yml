@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.npm
-          key: npm
+          key: npm@${{ matrix.cypress-version }}
       - name: Cache TypeScript installs
         uses: actions/cache@v2
         with:
