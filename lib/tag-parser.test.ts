@@ -22,6 +22,9 @@ describe("tagToCypressOptions", () => {
     blockHosts: ["http://www.foo.com", "http://www.bar.com"],
   });
   example("@defaultCommandTimeout(5)", { defaultCommandTimeout: 5 });
+  example("@env(foo='bar',baz=5,qux=false)", {
+    env: { foo: "bar", baz: 5, qux: false },
+  });
   example("@execTimeout(5)", { execTimeout: 5 });
   // example("@experimentalSessionAndOrigin(true)", {
   //   experimentalSessionAndOrigin: 5,

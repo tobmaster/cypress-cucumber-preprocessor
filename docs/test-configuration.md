@@ -6,6 +6,7 @@ Some of Cypress' [configuration options](https://docs.cypress.io/guides/referenc
 @animationDistanceThreshold(5)
 @blockHosts('http://www.foo.com','http://www.bar.com')
 @defaultCommandTimeout(5)
+@env(foo='bar',baz=5,qux=false)
 @execTimeout(5)
 @includeShadowDom(true)
 @includeShadowDom(false)
