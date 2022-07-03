@@ -98,12 +98,6 @@ export function getStepDefinitionPatternsPost10(
     throw new Error(`${filepath} is not inside ${projectRoot}`);
   }
 
-  debug(
-    `looking for step definitions using ${util.inspect(
-      configuration.preprocessor.stepDefinitions
-    )}`
-  );
-
   const filepathReplacement = trimFeatureExtension(
     path.relative(projectRoot, filepath)
   );
@@ -117,6 +111,8 @@ export function getStepDefinitionPatternsPost10(
   const stepDefinitions = configuration.preprocessor.stepDefinitions
     ? [configuration.preprocessor.stepDefinitions].flat()
     : DEFAULT_POST_10_STEP_DEFINITIONS;
+
+  debug(`looking for step definitions using ${util.inspect(stepDefinitions)}`);
 
   return stepDefinitions
     .flatMap((pattern) => {
