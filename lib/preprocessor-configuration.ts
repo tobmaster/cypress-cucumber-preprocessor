@@ -315,15 +315,15 @@ export interface IEnvironmentOverrides {
 }
 
 export const DEFAULT_PRE_10_STEP_DEFINITIONS = [
-  "[integration-directory]/[filepath]/**/*.{js,mjs,ts}",
-  "[integration-directory]/[filepath].{js,mjs,ts}",
-  "cypress/support/step_definitions/**/*.{js,mjs,ts}",
+  "[integration-directory]/[filepath]/**/*.{js,mjs,ts,tsx}",
+  "[integration-directory]/[filepath].{js,mjs,ts,tsx}",
+  "cypress/support/step_definitions/**/*.{js,mjs,ts,tsx}",
 ];
 
 export const DEFAULT_POST_10_STEP_DEFINITIONS = [
-  "[filepath]/**/*.{js,mjs,ts}",
-  "[filepath].{js,mjs,ts}",
-  "cypress/support/step_definitions/**/*.{js,mjs,ts}",
+  "[filepath]/**/*.{js,mjs,ts,tsx}",
+  "[filepath].{js,mjs,ts,tsx}",
+  "cypress/support/step_definitions/**/*.{js,mjs,ts,tsx}",
 ];
 
 export class PreprocessorConfiguration implements IPreprocessorConfiguration {

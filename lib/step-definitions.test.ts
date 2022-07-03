@@ -121,9 +121,9 @@ describe("getStepDefinitionPatternsPre10()", () => {
     },
     {},
     [
-      "/foo/bar/cypress/integration/baz/**/*.{js,mjs,ts}",
-      "/foo/bar/cypress/integration/baz.{js,mjs,ts}",
-      "/foo/bar/cypress/support/step_definitions/**/*.{js,mjs,ts}",
+      "/foo/bar/cypress/integration/baz/**/*.{js,mjs,ts,tsx}",
+      "/foo/bar/cypress/integration/baz.{js,mjs,ts,tsx}",
+      "/foo/bar/cypress/support/step_definitions/**/*.{js,mjs,ts,tsx}",
     ]
   );
 
@@ -199,9 +199,9 @@ describe("getStepDefinitionPatternsPost10()", () => {
     },
     {},
     [
-      "/foo/bar/cypress/e2e/baz/**/*.{js,mjs,ts}",
-      "/foo/bar/cypress/e2e/baz.{js,mjs,ts}",
-      "/foo/bar/cypress/support/step_definitions/**/*.{js,mjs,ts}",
+      "/foo/bar/cypress/e2e/baz/**/*.{js,mjs,ts,tsx}",
+      "/foo/bar/cypress/e2e/baz.{js,mjs,ts,tsx}",
+      "/foo/bar/cypress/support/step_definitions/**/*.{js,mjs,ts,tsx}",
     ]
   );
 
