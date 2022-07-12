@@ -2,6 +2,9 @@
   "default": {
     "publishQuiet": true,
     "format": ["@cucumber/pretty-formatter"],
+    "formatOptions": {
+      "colorsEnabled": true
+    },
     "requireModule": ["ts-node/register"],
     "require": ["features/**/*.ts"]
   }
