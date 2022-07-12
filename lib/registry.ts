@@ -24,7 +24,7 @@ import {
 
 import { maybeRetrievePositionFromSourceMap, Position } from "./source-map";
 
-interface IStepDefinition<T extends unknown[]> {
+export interface IStepDefinition<T extends unknown[]> {
   expression: Expression;
   implementation: IStepDefinitionBody<T>;
   position?: Position;
@@ -62,7 +62,7 @@ function parseHookArguments(
 }
 
 export class Registry {
-  private parameterTypeRegistry: ParameterTypeRegistry;
+  public parameterTypeRegistry: ParameterTypeRegistry;
 
   private preliminaryStepDefinitions: {
     description: string | RegExp;
@@ -159,10 +159,14 @@ export class Registry {
     );
   }
 
-  private resolveStepDefintion(text: string) {
-    const matchingStepDefinitions = this.stepDefinitions.filter(
-      (stepDefinition) => stepDefinition.expression.match(text)
+  public getMatchingStepDefinitions(text: string) {
+    return this.stepDefinitions.filter((stepDefinition) =>
+      stepDefinition.expression.match(text)
     );
+  }
+
+  public resolveStepDefintion(text: string) {
+    const matchingStepDefinitions = this.getMatchingStepDefinitions(text);
 
     if (matchingStepDefinitions.length === 0) {
       throw new MissingDefinitionError(

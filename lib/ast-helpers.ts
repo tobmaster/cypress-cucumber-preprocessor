@@ -2,6 +2,8 @@ import { messages } from "@cucumber/messages";
 
 import { assertAndReturn } from "./assertions";
 
+import { YieldType } from "./types";
+
 export function* traverseGherkinDocument(
   gherkinDocument: messages.IGherkinDocument
 ) {
@@ -212,4 +214,21 @@ export function collectTagNames(
       assertAndReturn(tag.name, "Expected tag to have a name")
     ) ?? []
   );
+}
+
+export function createAstIdMap(
+  gherkinDocument: messages.IGherkinDocument
+): Map<string, YieldType<ReturnType<typeof traverseGherkinDocument>>> {
+  const astIdMap = new Map<
+    string,
+    YieldType<ReturnType<typeof traverseGherkinDocument>>
+  >();
+
+  for (const node of traverseGherkinDocument(gherkinDocument)) {
+    if ("id" in node && node.id) {
+      astIdMap.set(node.id, node);
+    }
+  }
+
+  return astIdMap;
 }
