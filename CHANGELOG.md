@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v11.5.0
+
+- Improve error message upon missing step definition, fixes [#763](https://github.com/badeball/cypress-cucumber-preprocessor/issues/763).
+
 ## v11.4.0
 
 - Step definition with extension `.tsx` is picked up by default, paving the way for component testing.
