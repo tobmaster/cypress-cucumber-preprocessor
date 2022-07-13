@@ -8,7 +8,13 @@ import { assertAndReturn } from "./assertions";
 
 import DataTable from "./data_table";
 
-import { assignRegistry, freeRegistry, IHook, Registry } from "./registry";
+import {
+  assignRegistry,
+  freeRegistry,
+  IHook,
+  MissingDefinitionError,
+  Registry,
+} from "./registry";
 
 import { collectTagNames, traverseGherkinDocument } from "./ast-helpers";
 
@@ -26,6 +32,7 @@ import { getTags } from "./environment-helpers";
 import { notNull } from "./type-guards";
 
 import { looksLikeOptions, tagToCypressOptions } from "./tag-parser";
+import { Context } from "mocha";
 
 declare global {
   namespace globalThis {
@@ -44,6 +51,11 @@ interface CompositionContext {
   messages: {
     enabled: boolean;
     stack: messages.IEnvelope[];
+  };
+  stepDefinitionHints: {
+    stepDefinitions: string[];
+    stepDefinitionPatterns: string[];
+    stepDefinitionPaths: string[];
   };
 }
 
@@ -132,6 +144,28 @@ function duration(
     seconds: end.seconds - start.seconds,
     nanos: end.nanos - start.nanos,
   };
+}
+
+function minIndent(content: string) {
+  const match = content.match(/^[ \t]*(?=\S)/gm);
+
+  if (!match) {
+    return 0;
+  }
+
+  return match.reduce((r, a) => Math.min(r, a.length), Infinity);
+}
+
+function stripIndent(content: string) {
+  const indent = minIndent(content);
+
+  if (indent === 0) {
+    return content;
+  }
+
+  const regex = new RegExp(`^[ \\t]{${indent}}`, "gm");
+
+  return content.replace(regex, "");
 }
 
 function createFeature(
@@ -481,14 +515,24 @@ function createPickle(
             const ensureChain = (value: any): Cypress.Chainable<any> =>
               Cypress.isCy(value) ? value : cy.wrap(value, { log: false });
 
-            return ensureChain(
-              registry.runStepDefininition(this, text, argument)
-            ).then((result: any) => {
-              return {
-                start,
-                result,
-              };
-            });
+            try {
+              return ensureChain(
+                registry.runStepDefininition(this, text, argument)
+              ).then((result: any) => {
+                return {
+                  start,
+                  result,
+                };
+              });
+            } catch (e) {
+              if (e instanceof MissingDefinitionError) {
+                throw new Error(
+                  createMissingStepDefinitionMessage(context, text)
+                );
+              } else {
+                throw e;
+              }
+            }
           })
           .then(({ start, result }) => {
             const end = createTimestamp();
@@ -578,7 +622,12 @@ export default function createTests(
   gherkinDocument: messages.IGherkinDocument,
   pickles: messages.IPickle[],
   messagesEnabled: boolean,
-  omitFiltered: boolean
+  omitFiltered: boolean,
+  stepDefinitionHints: {
+    stepDefinitions: string[];
+    stepDefinitionPatterns: string[];
+    stepDefinitionPaths: string[];
+  }
 ) {
   const noopNode = { evaluate: () => true };
   const environmentTags = getTags(Cypress.env());
@@ -630,6 +679,7 @@ export default function createTests(
           enabled: messagesEnabled,
           stack: messages,
         },
+        stepDefinitionHints,
       },
       gherkinDocument.feature
     );
@@ -743,4 +793,83 @@ export default function createTests(
       cy.task(TASK_APPEND_MESSAGES, messages, { log: false });
     }
   });
+}
+
+function strictIsInteractive(): boolean {
+  const isInteractive = Cypress.config(
+    "isInteractive" as keyof Cypress.ConfigOptions
+  );
+
+  if (typeof isInteractive === "boolean") {
+    return isInteractive;
+  }
+
+  throw new Error(
+    "Expected to find a Cypress configuration property `isInteractive`, but didn't"
+  );
+}
+
+function createMissingStepDefinitionMessage(
+  context: CompositionContext,
+  text: string
+) {
+  const noStepDefinitionPathsTemplate = `
+    Step implementation missing for "<text>".
+
+    We tried searching for files containing step definitions using the following search pattern templates:
+
+    <step-definitions>
+
+    These templates resolved to the following search patterns:
+
+    <step-definition-patterns>
+
+    These patterns matched **no files** containing step definitions. This almost certainly means that you have misconfigured \`stepDefinitions\`.
+  `;
+
+  const someStepDefinitionPathsTemplate = `
+    Step implementation missing for "<text>".
+
+    We tried searching for files containing step definitions using the following search pattern templates:
+
+    <step-definitions>
+
+    These templates resolved to the following search patterns:
+
+    <step-definition-patterns>
+
+    These patterns matched the following files:
+
+    <step-definition-paths>
+
+    However, none of these files contained a step definition matching "<text>".
+  `;
+
+  const { stepDefinitionHints } = context;
+
+  const template =
+    stepDefinitionHints.stepDefinitionPaths.length > 0
+      ? someStepDefinitionPathsTemplate
+      : noStepDefinitionPathsTemplate;
+
+  const maybeEscape = (string: string) =>
+    strictIsInteractive() ? string.replace("*", "\\*") : string;
+
+  const prettyPrintList = (items: string[]) =>
+    items.map((item) => "  - " + maybeEscape(item)).join("\n");
+
+  return stripIndent(template)
+    .replaceAll("<text>", text)
+    .replaceAll(
+      "<step-definitions>",
+      prettyPrintList(stepDefinitionHints.stepDefinitions)
+    )
+    .replaceAll(
+      "<step-definition-patterns>",
+      prettyPrintList(stepDefinitionHints.stepDefinitionPatterns)
+    )
+    .replaceAll(
+      "<step-definition-paths>",
+      prettyPrintList(stepDefinitionHints.stepDefinitionPaths)
+    );
 }

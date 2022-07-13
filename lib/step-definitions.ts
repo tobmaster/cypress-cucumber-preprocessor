@@ -29,11 +29,11 @@ export async function getStepDefinitionPaths(
     cypress: ICypressConfiguration;
     preprocessor: IPreprocessorConfiguration;
   },
-  filepath: string
+  stepDefinitionPatterns: string[]
 ): Promise<string[]> {
   const files = (
     await Promise.all(
-      getStepDefinitionPatterns(configuration, filepath).map((pattern) =>
+      stepDefinitionPatterns.map((pattern) =>
         util.promisify(glob)(pattern, { nodir: true })
       )
     )

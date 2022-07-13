@@ -10,9 +10,14 @@ import { assertAndReturn } from "./assertions";
 
 import { resolve } from "./preprocessor-configuration";
 
-import { getStepDefinitionPaths } from "./step-definitions";
+import {
+  getStepDefinitionPaths,
+  getStepDefinitionPatterns,
+} from "./step-definitions";
 
 import { notNull } from "./type-guards";
+
+import { ensureIsRelative } from "./helpers";
 
 const { stringify } = JSON;
 
@@ -51,12 +56,22 @@ export async function compile(
 
   const preprocessor = await resolve(configuration, configuration.env);
 
-  const stepDefinitions = await getStepDefinitionPaths(
+  const { stepDefinitions } = preprocessor;
+
+  const stepDefinitionPatterns = getStepDefinitionPatterns(
     {
       cypress: configuration,
       preprocessor,
     },
     uri
+  );
+
+  const stepDefinitionPaths = await getStepDefinitionPaths(
+    {
+      cypress: configuration,
+      preprocessor,
+    },
+    stepDefinitionPatterns
   );
 
   const prepareLibPath = (...parts: string[]) =>
@@ -66,13 +81,18 @@ export async function compile(
 
   const registryPath = prepareLibPath("registry");
 
+  const ensureRelativeToProjectRoot = (path: string) =>
+    ensureIsRelative(configuration.projectRoot, path);
+
   return `
     const { default: createTests } = require(${createTestsPath});
     const { withRegistry } = require(${registryPath});
 
     const registry = withRegistry(() => {
-      ${stepDefinitions
-        .map((stepDefintion) => `require(${stringify(stepDefintion)});`)
+      ${stepDefinitionPaths
+        .map(
+          (stepDefinitionPath) => `require(${stringify(stepDefinitionPath)});`
+        )
         .join("\n    ")}
     });
 
@@ -84,7 +104,16 @@ export async function compile(
       ${stringify(gherkinDocument)},
       ${stringify(pickles)},
       ${preprocessor.messages.enabled},
-      ${preprocessor.omitFiltered}
+      ${preprocessor.omitFiltered},
+      ${stringify({
+        stepDefinitions,
+        stepDefinitionPatterns: stepDefinitionPatterns.map(
+          ensureRelativeToProjectRoot
+        ),
+        stepDefinitionPaths: stepDefinitionPaths.map(
+          ensureRelativeToProjectRoot
+        ),
+      })}
     );
   `;
 }

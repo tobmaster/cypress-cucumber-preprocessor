@@ -34,6 +34,17 @@ import { getTags } from "./environment-helpers";
 
 import { ensureIsAbsolute } from "./helpers";
 
+/**
+ * Work-around for the fact that some Cypress versions pre v10 were missing this property in their types.
+ */
+declare global {
+  namespace Cypress {
+    interface PluginConfigOptions {
+      testFiles: string[];
+    }
+  }
+}
+
 function memoize<T extends (...args: any[]) => any>(
   fn: T
 ): (...args: Parameters<T>) => ReturnType<T> {

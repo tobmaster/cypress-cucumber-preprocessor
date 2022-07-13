@@ -2,6 +2,7 @@ import util from "util";
 import { Given, When, Then } from "@cucumber/cucumber";
 import assert from "assert";
 import childProcess from "child_process";
+import { isPost10, isPre10 } from "../support/helpers";
 
 function execAsync(
   command: string
@@ -136,6 +137,18 @@ Then(
 
 Then("the output should contain", function (content) {
   assert.match(this.lastRun.stdout, new RegExp(rescape(content)));
+});
+
+Then("if pre-v10, the output should contain", function (content) {
+  if (isPre10()) {
+    assert.match(this.lastRun.stdout, new RegExp(rescape(content)));
+  }
+});
+
+Then("if post-v10, the output should contain", function (content) {
+  if (isPost10()) {
+    assert.match(this.lastRun.stdout, new RegExp(rescape(content)));
+  }
 });
 
 Then("the output should match", function (content) {
