@@ -54,7 +54,7 @@ let currentTestStepStartedId: string;
 let currentSpecMessages: messages.IEnvelope[];
 
 export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
-  const preprocessor = await resolve(config.projectRoot, config.env);
+  const preprocessor = await resolve(config, config.env);
 
   if (!preprocessor.messages.enabled) {
     return;
@@ -69,7 +69,7 @@ export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
 }
 
 export async function afterRunHandler(config: Cypress.PluginConfigOptions) {
-  const preprocessor = await resolve(config.projectRoot, config.env);
+  const preprocessor = await resolve(config, config.env);
 
   if (!preprocessor.json.enabled) {
     return;
@@ -136,7 +136,7 @@ export async function afterSpecHandler(
   spec: Cypress.Spec,
   results: CypressCommandLine.RunResult
 ) {
-  const preprocessor = await resolve(config.projectRoot, config.env);
+  const preprocessor = await resolve(config, config.env);
 
   const messagesPath = ensureIsAbsolute(
     config.projectRoot,
@@ -176,7 +176,7 @@ export async function afterScreenshotHandler(
   config: Cypress.PluginConfigOptions,
   details: Cypress.ScreenshotDetails
 ) {
-  const preprocessor = await resolve(config.projectRoot, config.env);
+  const preprocessor = await resolve(config, config.env);
 
   if (!preprocessor.messages.enabled || !currentSpecMessages) {
     return details;
@@ -218,7 +218,7 @@ export default async function addCucumberPreprocessorPlugin(
   config: Cypress.PluginConfigOptions,
   options: AddOptions = {}
 ) {
-  const preprocessor = await resolve(config.projectRoot, config.env);
+  const preprocessor = await resolve(config, config.env);
 
   if (!options.omitBeforeRunHandler) {
     on("before:run", () => beforeRunHandler(config));

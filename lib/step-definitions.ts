@@ -108,9 +108,7 @@ export function getStepDefinitionPatternsPost10(
 
   debug(`replacing [filepart] with ${util.inspect(parts)}`);
 
-  const stepDefinitions = configuration.preprocessor.stepDefinitions
-    ? [configuration.preprocessor.stepDefinitions].flat()
-    : DEFAULT_POST_10_STEP_DEFINITIONS;
+  const stepDefinitions = [configuration.preprocessor.stepDefinitions].flat();
 
   debug(`looking for step definitions using ${util.inspect(stepDefinitions)}`);
 
@@ -165,17 +163,7 @@ export function getStepDefinitionPatternsPre10(
 
   debug(`replacing [filepart] with ${util.inspect(parts)}`);
 
-  const stepDefinitions = configuration.preprocessor.stepDefinitions
-    ? [configuration.preprocessor.stepDefinitions].flat()
-    : DEFAULT_PRE_10_STEP_DEFINITIONS.map((pattern) =>
-        pattern.replace(
-          "[integration-directory]",
-          ensureIsRelative(
-            configuration.cypress.projectRoot,
-            configuration.cypress.integrationFolder
-          )
-        )
-      );
+  const stepDefinitions = [configuration.preprocessor.stepDefinitions].flat();
 
   debug(`looking for step definitions using ${util.inspect(stepDefinitions)}`);
 

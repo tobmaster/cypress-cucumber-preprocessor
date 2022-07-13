@@ -1,8 +1,12 @@
+import { ICypressConfiguration } from "@badeball/cypress-configuration";
+
 import { cosmiconfig } from "cosmiconfig";
 
 import util from "util";
 
 import debug from "./debug";
+
+import { ensureIsRelative } from "./helpers";
 
 import { isString, isStringOrStringArray, isBoolean } from "./type-guards";
 
@@ -287,7 +291,7 @@ export function stringToMaybeBoolean(value: string): boolean | undefined {
 }
 
 export interface IPreprocessorConfiguration {
-  readonly stepDefinitions?: string | string[];
+  readonly stepDefinitions: string | string[];
   readonly messages?: {
     enabled: boolean;
     output?: string;
@@ -329,14 +333,31 @@ export const DEFAULT_POST_10_STEP_DEFINITIONS = [
 export class PreprocessorConfiguration implements IPreprocessorConfiguration {
   constructor(
     private explicitValues: Partial<IPreprocessorConfiguration>,
-    private environmentOverrides: IEnvironmentOverrides
+    private environmentOverrides: IEnvironmentOverrides,
+    private cypressConfiguration: ICypressConfiguration
   ) {}
 
   get stepDefinitions() {
-    return (
+    const explicit =
       this.environmentOverrides.stepDefinitions ??
-      this.explicitValues.stepDefinitions
-    );
+      this.explicitValues.stepDefinitions;
+
+    if (explicit) {
+      return explicit;
+    }
+
+    const config = this.cypressConfiguration;
+
+    if ("specPattern" in config) {
+      return DEFAULT_POST_10_STEP_DEFINITIONS;
+    } else {
+      return DEFAULT_PRE_10_STEP_DEFINITIONS.map((pattern) =>
+        pattern.replace(
+          "[integration-directory]",
+          ensureIsRelative(config.projectRoot, config.integrationFolder)
+        )
+      );
+    }
   }
 
   get messages() {
@@ -403,11 +424,11 @@ export type ConfigurationFileResolver = (
 ) => any | Promise<any>;
 
 export async function resolve(
-  projectRoot: string,
+  cypressConfig: ICypressConfiguration,
   environment: Record<string, unknown>,
   configurationFileResolver: ConfigurationFileResolver = cosmiconfigResolver
 ) {
-  const result = await configurationFileResolver(projectRoot);
+  const result = await configurationFileResolver(cypressConfig.projectRoot);
 
   const environmentOverrides = validateEnvironmentOverrides(environment);
 
@@ -429,10 +450,18 @@ export async function resolve(
 
     debug(`resolved configuration ${util.inspect(config)}`);
 
-    return new PreprocessorConfiguration(config, environmentOverrides);
+    return new PreprocessorConfiguration(
+      config,
+      environmentOverrides,
+      cypressConfig
+    );
   } else {
     debug("resolved no configuration");
 
-    return new PreprocessorConfiguration({}, environmentOverrides);
+    return new PreprocessorConfiguration(
+      {},
+      environmentOverrides,
+      cypressConfig
+    );
   }
 }

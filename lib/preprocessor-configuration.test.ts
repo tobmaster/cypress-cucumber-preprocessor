@@ -1,11 +1,20 @@
+import { ICypressPost10Configuration } from "@badeball/cypress-configuration";
+
 import assert from "assert";
 
 import { resolve } from "./preprocessor-configuration";
 
+const DUMMY_POST10_CONFIG: ICypressPost10Configuration = {
+  projectRoot: "",
+  specPattern: [],
+  excludeSpecPattern: [],
+  env: {},
+};
+
 describe("resolve()", () => {
   it("overriding stepDefinitions", async () => {
     const { stepDefinitions } = await resolve(
-      "/foo/bar",
+      DUMMY_POST10_CONFIG,
       { stepDefinitions: "foo/bar/**" },
       () => null
     );
@@ -16,7 +25,7 @@ describe("resolve()", () => {
   it("overriding messages.enabled (1)", async () => {
     const {
       messages: { enabled },
-    } = await resolve("/foo/bar", { messagesEnabled: "" }, () => ({
+    } = await resolve(DUMMY_POST10_CONFIG, { messagesEnabled: "" }, () => ({
       messages: { enabled: true },
     }));
 
@@ -26,7 +35,7 @@ describe("resolve()", () => {
   it("overriding messages.enabled (2)", async () => {
     const {
       messages: { enabled },
-    } = await resolve("/foo/bar", { messagesEnabled: "true" }, () => ({
+    } = await resolve(DUMMY_POST10_CONFIG, { messagesEnabled: "true" }, () => ({
       messages: { enabled: false },
     }));
 
@@ -36,9 +45,13 @@ describe("resolve()", () => {
   it("overriding messages.enabled (3)", async () => {
     const {
       messages: { enabled },
-    } = await resolve("/foo/bar", { messagesEnabled: "foobar" }, () => ({
-      messages: { enabled: false },
-    }));
+    } = await resolve(
+      DUMMY_POST10_CONFIG,
+      { messagesEnabled: "foobar" },
+      () => ({
+        messages: { enabled: false },
+      })
+    );
 
     assert.strictEqual(enabled, true);
   });
@@ -46,7 +59,7 @@ describe("resolve()", () => {
   it("overriding messages.enabled (4)", async () => {
     const {
       messages: { enabled },
-    } = await resolve("/foo/bar", { messagesEnabled: true }, () => ({
+    } = await resolve(DUMMY_POST10_CONFIG, { messagesEnabled: true }, () => ({
       messages: { enabled: false },
     }));
 
@@ -56,9 +69,13 @@ describe("resolve()", () => {
   it("overriding messages.enabled (5)", async () => {
     const {
       messages: { enabled },
-    } = await resolve("/foo/bar", { messagesEnabled: "false" }, () => ({
-      messages: { enabled: true },
-    }));
+    } = await resolve(
+      DUMMY_POST10_CONFIG,
+      { messagesEnabled: "false" },
+      () => ({
+        messages: { enabled: true },
+      })
+    );
 
     assert.strictEqual(enabled, false);
   });
@@ -66,9 +83,13 @@ describe("resolve()", () => {
   it("overriding messages.enabled (6)", async () => {
     const {
       messages: { enabled },
-    } = await resolve("/foo/bar", { messagesEnabled: "false" }, () => ({
-      messages: { enabled: true },
-    }));
+    } = await resolve(
+      DUMMY_POST10_CONFIG,
+      { messagesEnabled: "false" },
+      () => ({
+        messages: { enabled: true },
+      })
+    );
 
     assert.strictEqual(enabled, false);
   });
@@ -76,7 +97,7 @@ describe("resolve()", () => {
   it("overriding messages.enabled (7)", async () => {
     const {
       messages: { enabled },
-    } = await resolve("/foo/bar", { messagesEnabled: false }, () => ({
+    } = await resolve(DUMMY_POST10_CONFIG, { messagesEnabled: false }, () => ({
       messages: { enabled: true },
     }));
 

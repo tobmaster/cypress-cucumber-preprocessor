@@ -18,15 +18,27 @@ import {
   pathParts,
 } from "./step-definitions";
 
+const DUMMY_PRE10_CONFIG: ICypressPre10Configuration = {
+  projectRoot: "",
+  integrationFolder: "",
+  fixturesFolder: "",
+  supportFile: false,
+  testFiles: [],
+  ignoreTestFiles: [],
+  env: {},
+};
+
 function pre10example(
   filepath: string,
-  cypressConfiguration: Pick<
-    ICypressPre10Configuration,
-    "projectRoot" | "integrationFolder"
-  >,
+  partialCypressConfiguration: Partial<ICypressPre10Configuration>,
   preprocessorConfiguration: Partial<IPreprocessorConfiguration>,
   expected: string[]
 ) {
+  const cypressConfiguration: ICypressPre10Configuration = {
+    ...DUMMY_PRE10_CONFIG,
+    ...partialCypressConfiguration,
+  };
+
   it(`should return [${expected.join(
     ", "
   )}] for ${filepath} with ${util.inspect(preprocessorConfiguration)} in ${
@@ -37,7 +49,8 @@ function pre10example(
         cypress: cypressConfiguration,
         preprocessor: new PreprocessorConfiguration(
           preprocessorConfiguration,
-          {}
+          {},
+          cypressConfiguration
         ),
       },
       filepath
@@ -61,12 +74,24 @@ function pre10example(
   });
 }
 
+const DUMMY_POST10_CONFIG: ICypressPost10Configuration = {
+  projectRoot: "",
+  specPattern: [],
+  excludeSpecPattern: [],
+  env: {},
+};
+
 function post10example(
   filepath: string,
-  cypressConfiguration: Pick<ICypressPost10Configuration, "projectRoot">,
+  partialCypressConfiguration: Partial<ICypressPost10Configuration>,
   preprocessorConfiguration: Partial<IPreprocessorConfiguration>,
   expected: string[]
 ) {
+  const cypressConfiguration: ICypressPost10Configuration = {
+    ...DUMMY_POST10_CONFIG,
+    ...partialCypressConfiguration,
+  };
+
   it(`should return [${expected.join(
     ", "
   )}] for ${filepath} with ${util.inspect(preprocessorConfiguration)} in ${
@@ -77,7 +102,8 @@ function post10example(
         cypress: cypressConfiguration,
         preprocessor: new PreprocessorConfiguration(
           preprocessorConfiguration,
-          {}
+          {},
+          cypressConfiguration
         ),
       },
       filepath
