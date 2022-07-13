@@ -14,6 +14,8 @@ import { assertAndReturn } from "./assertions";
 
 import DataTable from "./data_table";
 
+import { CypressCucumberError } from "./error";
+
 import {
   IHookBody,
   IParameterTypeDefinition,
@@ -24,6 +26,10 @@ interface IStepDefinition<T extends unknown[]> {
   expression: Expression;
   implementation: IStepDefinitionBody<T>;
 }
+
+export class MissingDefinitionError extends CypressCucumberError {}
+
+export class MultipleDefinitionsError extends CypressCucumberError {}
 
 export type HookKeyword = "Before" | "After";
 
@@ -131,9 +137,11 @@ export class Registry {
     );
 
     if (matchingStepDefinitions.length === 0) {
-      throw new Error(`Step implementation missing for: ${text}`);
+      throw new MissingDefinitionError(
+        `Step implementation missing for: ${text}`
+      );
     } else if (matchingStepDefinitions.length > 1) {
-      throw new Error(
+      throw new MultipleDefinitionsError(
         `Multiple matching step definitions for: ${text}\n` +
           matchingStepDefinitions
             .map((stepDefinition) => {
