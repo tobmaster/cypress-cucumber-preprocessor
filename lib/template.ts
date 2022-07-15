@@ -67,10 +67,6 @@ export async function compile(
   );
 
   const stepDefinitionPaths = await getStepDefinitionPaths(
-    {
-      cypress: configuration,
-      preprocessor,
-    },
     stepDefinitionPatterns
   );
 

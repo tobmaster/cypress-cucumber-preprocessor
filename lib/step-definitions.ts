@@ -25,10 +25,6 @@ import {
 import { ensureIsAbsolute, ensureIsRelative } from "./helpers";
 
 export async function getStepDefinitionPaths(
-  configuration: {
-    cypress: ICypressConfiguration;
-    preprocessor: IPreprocessorConfiguration;
-  },
   stepDefinitionPatterns: string[]
 ): Promise<string[]> {
   const files = (
