@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v11.5.1
+
+- Expose member `getStepDefinitionPatterns`.
+
 ## v11.5.0
 
 - Improve error message upon missing step definition, fixes [#763](https://github.com/badeball/cypress-cucumber-preprocessor/issues/763).
