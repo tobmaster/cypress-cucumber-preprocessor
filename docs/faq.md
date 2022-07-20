@@ -15,3 +15,11 @@ Upgrade your node version to at least [v14.14.0](https://nodejs.org/api/fs.html#
 ### I get `spawn cucumber-json-formatter ENOENT`
 
 You need to install `cucumber-json-formatter` **yourself**, as per [documentation](json-report.md).
+
+---
+
+### Why is `cypress-tags` missing?
+
+From [#689](https://github.com/badeball/cypress-cucumber-preprocessor/issues/689):
+
+> The `cypress-tags` has been removed and made redundant. Specs containing no matching scenarios are [automatically filtered](https://github.com/badeball/cypress-cucumber-preprocessor/blob/master/docs/tags.md#running-a-subset-of-scenarios), provided that `filterSpecs` is set to true.
