@@ -22,9 +22,12 @@ import {
   IStepDefinitionBody,
 } from "./types";
 
+import { maybeRetrievePositionFromSourceMap, Position } from "./source-map";
+
 interface IStepDefinition<T extends unknown[]> {
   expression: Expression;
   implementation: IStepDefinitionBody<T>;
+  position?: Position;
 }
 
 export class MissingDefinitionError extends CypressCucumberError {}
@@ -38,6 +41,7 @@ export interface IHook {
   node: ReturnType<typeof parse>;
   implementation: IHookBody;
   keyword: HookKeyword;
+  position?: Position;
 }
 
 const noopNode = { evaluate: () => true };
@@ -45,13 +49,15 @@ const noopNode = { evaluate: () => true };
 function parseHookArguments(
   options: { tags?: string },
   fn: IHookBody,
-  keyword: HookKeyword
+  keyword: HookKeyword,
+  position?: Position
 ): IHook {
   return {
     id: uuid(),
     node: options.tags ? parse(options.tags) : noopNode,
     implementation: fn,
     keyword,
+    position,
   };
 }
 
@@ -61,15 +67,16 @@ export class Registry {
   private preliminaryStepDefinitions: {
     description: string | RegExp;
     implementation: () => void;
+    position?: Position;
   }[] = [];
 
-  private stepDefinitions: IStepDefinition<unknown[]>[] = [];
+  public stepDefinitions: IStepDefinition<unknown[]>[] = [];
 
   public beforeHooks: IHook[] = [];
 
   public afterHooks: IHook[] = [];
 
-  constructor() {
+  constructor(private experimentalSourceMap: boolean) {
     this.defineStep = this.defineStep.bind(this);
     this.runStepDefininition = this.runStepDefininition.bind(this);
     this.defineParameterType = this.defineParameterType.bind(this);
@@ -80,7 +87,7 @@ export class Registry {
   }
 
   public finalize() {
-    for (const { description, implementation } of this
+    for (const { description, implementation, position } of this
       .preliminaryStepDefinitions) {
       if (typeof description === "string") {
         this.stepDefinitions.push({
@@ -89,6 +96,7 @@ export class Registry {
             this.parameterTypeRegistry
           ),
           implementation,
+          position,
         });
       } else {
         this.stepDefinitions.push({
@@ -97,12 +105,17 @@ export class Registry {
             this.parameterTypeRegistry
           ),
           implementation,
+          position,
         });
       }
     }
   }
 
   public defineStep(description: string | RegExp, implementation: () => void) {
+    let position: Position | undefined;
+
+    position = maybeRetrievePositionFromSourceMap(this.experimentalSourceMap);
+
     if (typeof description !== "string" && !(description instanceof RegExp)) {
       throw new Error("Unexpected argument for step definition");
     }
@@ -110,6 +123,7 @@ export class Registry {
     this.preliminaryStepDefinitions.push({
       description,
       implementation,
+      position,
     });
   }
 
@@ -124,11 +138,25 @@ export class Registry {
   }
 
   public defineBefore(options: { tags?: string }, fn: IHookBody) {
-    this.beforeHooks.push(parseHookArguments(options, fn, "Before"));
+    this.beforeHooks.push(
+      parseHookArguments(
+        options,
+        fn,
+        "Before",
+        maybeRetrievePositionFromSourceMap(this.experimentalSourceMap)
+      )
+    );
   }
 
   public defineAfter(options: { tags?: string }, fn: IHookBody) {
-    this.afterHooks.push(parseHookArguments(options, fn, "After"));
+    this.afterHooks.push(
+      parseHookArguments(
+        options,
+        fn,
+        "After",
+        maybeRetrievePositionFromSourceMap(this.experimentalSourceMap)
+      )
+    );
   }
 
   private resolveStepDefintion(text: string) {
@@ -146,10 +174,16 @@ export class Registry {
           matchingStepDefinitions
             .map((stepDefinition) => {
               const { expression } = stepDefinition;
-              if (expression instanceof RegularExpression) {
-                return ` ${expression.regexp}`;
-              } else if (expression instanceof CucumberExpression) {
-                return ` ${expression.source}`;
+
+              const stringExpression =
+                expression instanceof RegularExpression
+                  ? String(expression.regexp)
+                  : expression.source;
+
+              if (stepDefinition.position) {
+                return ` ${stringExpression} - ${stepDefinition.position.source}:${stepDefinition.position.line}`;
+              } else {
+                return ` ${stringExpression}`;
               }
             })
             .join("\n")
@@ -205,8 +239,11 @@ declare global {
 const globalPropertyName =
   "__cypress_cucumber_preprocessor_registry_dont_use_this";
 
-export function withRegistry(fn: () => void): Registry {
-  const registry = new Registry();
+export function withRegistry(
+  experimentalSourceMap: boolean,
+  fn: () => void
+): Registry {
+  const registry = new Registry(experimentalSourceMap);
   assignRegistry(registry);
   fn();
   freeRegistry();
