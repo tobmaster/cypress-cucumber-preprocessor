@@ -1,5 +1,7 @@
 # Examples
 
+These are the *only* official examples at the time of writing. Any other example you come across is **not official** and might be severely outdated by now.
+
 ## E2E testing
 
 The examples illustrates using each bundler in each language flavor.

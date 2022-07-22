@@ -1,6 +1,7 @@
 # Documentation
 
 * [Quick start](quick-start.md)
+* [Examples](../examples/) (configuration, setup, etc.)
 * [Cucumber basics](cucumber-basics.md)
 * [State management](state-management.md)
 * [Step definitions](step-definitions.md)
