@@ -142,24 +142,6 @@ Then("the output should contain", function (content) {
   );
 });
 
-Then("if pre-v10, the output should contain", function (content) {
-  if (isPre10()) {
-    assert.match(
-      this.lastRun.stdout.replaceAll("\\", "/"),
-      new RegExp(rescape(content))
-    );
-  }
-});
-
-Then("if post-v10, the output should contain", function (content) {
-  if (isPost10()) {
-    assert.match(
-      this.lastRun.stdout.replaceAll("\\", "/"),
-      new RegExp(rescape(content))
-    );
-  }
-});
-
 Then(
   "it should appear to have skipped the scenario {string}",
   function (scenarioName) {

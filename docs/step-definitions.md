@@ -5,8 +5,8 @@ Step definitions are resolved using search paths that are configurable through t
 ```json
 {
   "stepDefinitions": [
-    "[filepath]/**/*.{js,ts}",
-    "[filepath].{js,ts}",
+    "cypress/e2e/[filepath]/**/*.{js,ts}",
+    "cypress/e2e/[filepath].{js,ts}",
     "cypress/support/step_definitions/**/*.{js,ts}",
   ]
 }

@@ -4,7 +4,12 @@ import { generateMessages } from "@cucumber/gherkin";
 
 import { IdGenerator, SourceMediaType } from "@cucumber/messages";
 
-import { ICypressConfiguration } from "@badeball/cypress-configuration";
+import {
+  ICypressConfiguration,
+  getTestFiles,
+} from "@badeball/cypress-configuration";
+
+import ancestor from "common-ancestor-path";
 
 import { assertAndReturn } from "./assertions";
 
@@ -59,7 +64,16 @@ export async function compile(
 
   const pickles = envelopes.map((envelope) => envelope.pickle).filter(notNull);
 
-  const preprocessor = await resolve(configuration, configuration.env);
+  const implicitIntegrationFolder = assertAndReturn(
+    ancestor(...getTestFiles(configuration).map(path.dirname)),
+    "Expected to find a common ancestor path"
+  );
+
+  const preprocessor = await resolve(
+    configuration,
+    configuration.env,
+    implicitIntegrationFolder
+  );
 
   const { stepDefinitions } = preprocessor;
 

@@ -365,6 +365,7 @@ export interface IPreprocessorConfiguration {
   };
   readonly filterSpecs?: boolean;
   readonly omitFiltered?: boolean;
+  readonly implicitIntegrationFolder: string;
 }
 
 export interface IEnvironmentOverrides {
@@ -381,15 +382,9 @@ export interface IEnvironmentOverrides {
   omitFiltered?: boolean;
 }
 
-export const DEFAULT_PRE_10_STEP_DEFINITIONS = [
+export const DEFAULT_STEP_DEFINITIONS = [
   "[integration-directory]/[filepath]/**/*.{js,mjs,ts,tsx}",
   "[integration-directory]/[filepath].{js,mjs,ts,tsx}",
-  "cypress/support/step_definitions/**/*.{js,mjs,ts,tsx}",
-];
-
-export const DEFAULT_POST_10_STEP_DEFINITIONS = [
-  "[filepath]/**/*.{js,mjs,ts,tsx}",
-  "[filepath].{js,mjs,ts,tsx}",
   "cypress/support/step_definitions/**/*.{js,mjs,ts,tsx}",
 ];
 
@@ -397,7 +392,8 @@ export class PreprocessorConfiguration implements IPreprocessorConfiguration {
   constructor(
     private explicitValues: Partial<IPreprocessorConfiguration>,
     private environmentOverrides: IEnvironmentOverrides,
-    private cypressConfiguration: ICypressConfiguration
+    private cypressConfiguration: ICypressConfiguration,
+    public implicitIntegrationFolder: string
   ) {}
 
   get stepDefinitions() {
@@ -411,16 +407,17 @@ export class PreprocessorConfiguration implements IPreprocessorConfiguration {
 
     const config = this.cypressConfiguration;
 
-    if ("specPattern" in config) {
-      return DEFAULT_POST_10_STEP_DEFINITIONS;
-    } else {
-      return DEFAULT_PRE_10_STEP_DEFINITIONS.map((pattern) =>
-        pattern.replace(
-          "[integration-directory]",
-          ensureIsRelative(config.projectRoot, config.integrationFolder)
+    return DEFAULT_STEP_DEFINITIONS.map((pattern) =>
+      pattern.replace(
+        "[integration-directory]",
+        ensureIsRelative(
+          config.projectRoot,
+          "integrationFolder" in config
+            ? config.integrationFolder
+            : this.implicitIntegrationFolder
         )
-      );
-    }
+      )
+    );
   }
 
   get messages() {
@@ -503,6 +500,7 @@ export type ConfigurationFileResolver = (
 export async function resolve(
   cypressConfig: ICypressConfiguration,
   environment: Record<string, unknown>,
+  implicitIntegrationFolder: string,
   configurationFileResolver: ConfigurationFileResolver = cosmiconfigResolver
 ) {
   const result = await configurationFileResolver(cypressConfig.projectRoot);
@@ -530,7 +528,8 @@ export async function resolve(
     return new PreprocessorConfiguration(
       config,
       environmentOverrides,
-      cypressConfig
+      cypressConfig,
+      implicitIntegrationFolder
     );
   } else {
     debug("resolved no configuration");
@@ -538,7 +537,8 @@ export async function resolve(
     return new PreprocessorConfiguration(
       {},
       environmentOverrides,
-      cypressConfig
+      cypressConfig,
+      implicitIntegrationFolder
     );
   }
 }

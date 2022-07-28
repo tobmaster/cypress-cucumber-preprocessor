@@ -1,5 +1,7 @@
 import util from "util";
 
+import path from "path";
+
 import assert from "assert";
 
 import {
@@ -50,7 +52,8 @@ function pre10example(
         preprocessor: new PreprocessorConfiguration(
           preprocessorConfiguration,
           {},
-          cypressConfiguration
+          cypressConfiguration,
+          path.dirname(filepath)
         ),
       },
       filepath
@@ -85,6 +88,7 @@ function post10example(
   filepath: string,
   partialCypressConfiguration: Partial<ICypressPost10Configuration>,
   preprocessorConfiguration: Partial<IPreprocessorConfiguration>,
+  implicitIntegrationFolder: string,
   expected: string[]
 ) {
   const cypressConfiguration: ICypressPost10Configuration = {
@@ -103,7 +107,8 @@ function post10example(
         preprocessor: new PreprocessorConfiguration(
           preprocessorConfiguration,
           {},
-          cypressConfiguration
+          cypressConfiguration,
+          implicitIntegrationFolder
         ),
       },
       filepath
@@ -192,6 +197,7 @@ describe("getStepDefinitionPatternsPre10()", () => {
           },
           preprocessor: {
             stepDefinitions: [],
+            implicitIntegrationFolder: "/foo/bar/cypress/integration",
           },
         },
         "/foo/bar/cypress/features/baz.feature"
@@ -209,6 +215,7 @@ describe("getStepDefinitionPatternsPre10()", () => {
           },
           preprocessor: {
             stepDefinitions: [],
+            implicitIntegrationFolder: "/foo/bar/cypress/integration",
           },
         },
         "/foo/bar/cypress/integration/baz.feature"
@@ -224,6 +231,7 @@ describe("getStepDefinitionPatternsPost10()", () => {
       projectRoot: "/foo/bar",
     },
     {},
+    "/foo/bar/cypress/e2e",
     [
       "/foo/bar/cypress/e2e/baz/**/*.{js,mjs,ts,tsx}",
       "/foo/bar/cypress/e2e/baz.{js,mjs,ts,tsx}",
@@ -237,8 +245,9 @@ describe("getStepDefinitionPatternsPost10()", () => {
       projectRoot: "/",
     },
     {
-      stepDefinitions: "[filepath]/step_definitions/*.ts",
+      stepDefinitions: "/cypress/e2e/[filepath]/step_definitions/*.ts",
     },
+    "/cypress/e2e",
     ["/cypress/e2e/foo/bar/baz/step_definitions/*.ts"]
   );
 
@@ -248,15 +257,14 @@ describe("getStepDefinitionPatternsPost10()", () => {
       projectRoot: "/",
     },
     {
-      stepDefinitions: "[filepart]/step_definitions/*.ts",
+      stepDefinitions: "/cypress/e2e/[filepart]/step_definitions/*.ts",
     },
+    "/cypress/e2e",
     [
       "/cypress/e2e/foo/bar/baz/step_definitions/*.ts",
       "/cypress/e2e/foo/bar/step_definitions/*.ts",
       "/cypress/e2e/foo/step_definitions/*.ts",
       "/cypress/e2e/step_definitions/*.ts",
-      "/cypress/step_definitions/*.ts",
-      "/step_definitions/*.ts",
     ]
   );
 
@@ -269,6 +277,7 @@ describe("getStepDefinitionPatternsPost10()", () => {
           },
           preprocessor: {
             stepDefinitions: [],
+            implicitIntegrationFolder: "/foo/bar/cypress/e2e",
           },
         },
         "/foo/bar/cypress/e2e/baz.feature"

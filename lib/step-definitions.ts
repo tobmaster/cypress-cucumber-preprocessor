@@ -16,13 +16,9 @@ import {
 
 import debug from "./debug";
 
-import {
-  DEFAULT_POST_10_STEP_DEFINITIONS,
-  DEFAULT_PRE_10_STEP_DEFINITIONS,
-  IPreprocessorConfiguration,
-} from "./preprocessor-configuration";
+import { IPreprocessorConfiguration } from "./preprocessor-configuration";
 
-import { ensureIsAbsolute, ensureIsRelative } from "./helpers";
+import { ensureIsAbsolute } from "./helpers";
 
 export async function getStepDefinitionPaths(
   stepDefinitionPatterns: string[]
@@ -95,7 +91,10 @@ export function getStepDefinitionPatternsPost10(
   }
 
   const filepathReplacement = trimFeatureExtension(
-    path.relative(projectRoot, filepath)
+    path.relative(
+      configuration.preprocessor.implicitIntegrationFolder,
+      filepath
+    )
   );
 
   debug(`replacing [filepath] with ${util.inspect(filepathReplacement)}`);

@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+Breaking changes:
+
+- A minor change to step definitions has been introduced, affecting users of Cypress v10 or higher. When upgrading to v11.0.0 of the processor, users was instructed to [remove certain prefixes](https://github.com/badeball/cypress-cucumber-preprocessor/releases/tag/v11.0.0) from their step definitions. This is no longer required and said prefixes can be re-introduced when upgrading to v12.0.0 of the preprocessor. In other words, if your configuration looks like this
+
+```json
+{
+  "stepDefinitions": [
+    "[filepath].{js,ts}",
+    "cypress/support/step_definitions/**/*.{js,ts}"
+  ]
+}
+```
+
+.. then it should now look like this (notice the addition of `cypress/e2e`)
+
+```json
+{
+  "stepDefinitions": [
+    "cypress/e2e/[filepath].{js,ts}",
+    "cypress/support/step_definitions/**/*.{js,ts}"
+  ]
+}
+```
+
+Note: Step definitions doesn't necessarily have to be put in `cypress/e2e` and alongside your feature files. They can be contained in an entirely separate directory, if desired. This fixes [#748](https://github.com/badeball/cypress-cucumber-preprocessor/issues/748).
+
+Other changes:
+
 - Updated all `@cucumber/*` dependencies.
 
 - Added native support for HTML reports using `@cucumber/html-formatter`, fixes [#780](https://github.com/badeball/cypress-cucumber-preprocessor/issues/780).
