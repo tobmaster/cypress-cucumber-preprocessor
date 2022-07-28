@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@badeball/cypress-configuration": "^4.0.0",
-    "@cucumber/cucumber-expressions": "^15.0.1",
+    "@cucumber/cucumber-expressions": "^16.0.0",
     "@cucumber/gherkin": "^15.0.2",
     "@cucumber/messages": "^13.2.1",
     "@cucumber/tag-expressions": "^4.1.0",
