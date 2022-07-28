@@ -1,3 +1,3 @@
-window.testState.gherkinDocument; // $ExpectType IGherkinDocument
-window.testState.pickles; // $ExpectType IPickle[]
-window.testState.pickle; // $ExpectType IPickle
+window.testState.gherkinDocument; // $ExpectType GherkinDocument
+window.testState.pickles; // $ExpectType Pickle[]
+window.testState.pickle; // $ExpectType Pickle

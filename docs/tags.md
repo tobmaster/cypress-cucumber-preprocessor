@@ -5,7 +5,8 @@ Tests can be filtered using the (Cypress-) [environment variable](https://docs.c
 A feature or scenario can have as many tags as you like, separated by spaces. Tags can be placed above the following Gherkin elements.
 
 * `Feature`
-* `scenario`
+* `Rule`
+* `Scenario`
 * `Scenario Outline`
 * `Examples`
 

@@ -6,13 +6,11 @@ import child_process from "child_process";
 
 import chalk from "chalk";
 
-import { messages } from "@cucumber/messages";
+import messages, { IdGenerator, SourceMediaType } from "@cucumber/messages";
 
 import parse from "@cucumber/tag-expressions";
 
 import { generateMessages } from "@cucumber/gherkin";
-
-import { IdGenerator } from "@cucumber/messages";
 
 import {
   getTestFiles,
@@ -62,7 +60,7 @@ function memoize<T extends (...args: any[]) => any>(
 const resolve = memoize(origResolve);
 
 let currentTestStepStartedId: string;
-let currentSpecMessages: messages.IEnvelope[];
+let currentSpecMessages: messages.Envelope[];
 
 export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
   const preprocessor = await resolve(config, config.env);
@@ -201,13 +199,13 @@ export async function afterScreenshotHandler(
     return details;
   }
 
-  const message: messages.IEnvelope = {
+  const message: messages.Envelope = {
     attachment: {
       testStepId: currentTestStepStartedId,
       body: buffer.toString("base64"),
       mediaType: "image/png",
       contentEncoding:
-        "BASE64" as unknown as messages.Attachment.ContentEncoding,
+        "BASE64" as unknown as messages.AttachmentContentEncoding.BASE64,
     },
   };
 
@@ -256,7 +254,7 @@ export default async function addCucumberPreprocessorPlugin(
   }
 
   on("task", {
-    [TASK_APPEND_MESSAGES]: (messages: messages.IEnvelope[]) => {
+    [TASK_APPEND_MESSAGES]: (messages: messages.Envelope[]) => {
       if (!currentSpecMessages) {
         return true;
       }
@@ -281,7 +279,7 @@ export default async function addCucumberPreprocessorPlugin(
         return true;
       }
 
-      const message: messages.IEnvelope = {
+      const message: messages.Envelope = {
         attachment: {
           testStepId: currentTestStepStartedId,
           body: data,
@@ -315,7 +313,12 @@ export default async function addCucumberPreprocessorPlugin(
         newId: IdGenerator.incrementing(),
       };
 
-      const envelopes = generateMessages(content, testFile, options);
+      const envelopes = generateMessages(
+        content,
+        testFile,
+        SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN,
+        options
+      );
 
       const pickles = envelopes
         .map((envelope) => envelope.pickle)

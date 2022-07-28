@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Updated all `@cucumber/*` dependencies.
+
 ## v11.5.1
 
 - Expose member `getStepDefinitionPatterns`.

@@ -1,9 +1,9 @@
-import { messages } from "@cucumber/messages";
+import messages from "@cucumber/messages";
 
 import { assertAndReturn } from "./assertions";
 
 export function* traverseGherkinDocument(
-  gherkinDocument: messages.IGherkinDocument
+  gherkinDocument: messages.GherkinDocument
 ) {
   yield gherkinDocument;
 
@@ -12,7 +12,7 @@ export function* traverseGherkinDocument(
   }
 }
 
-function* traverseFeature(feature: messages.GherkinDocument.IFeature) {
+function* traverseFeature(feature: messages.Feature) {
   yield feature;
 
   if (feature.location) {
@@ -32,9 +32,7 @@ function* traverseFeature(feature: messages.GherkinDocument.IFeature) {
   }
 }
 
-function* traverseFeatureChild(
-  featureChild: messages.GherkinDocument.Feature.IFeatureChild
-) {
+function* traverseFeatureChild(featureChild: messages.FeatureChild) {
   yield featureChild;
 
   if (featureChild.rule) {
@@ -50,9 +48,7 @@ function* traverseFeatureChild(
   }
 }
 
-function* traverseFeatureRule(
-  rule: messages.GherkinDocument.Feature.FeatureChild.IRule
-) {
+function* traverseFeatureRule(rule: messages.Rule) {
   yield rule;
 
   if (rule.location) {
@@ -66,9 +62,7 @@ function* traverseFeatureRule(
   }
 }
 
-function* traverseRuleChild(
-  ruleChild: messages.GherkinDocument.Feature.FeatureChild.IRuleChild
-) {
+function* traverseRuleChild(ruleChild: messages.RuleChild) {
   yield ruleChild;
 
   if (ruleChild.background) {
@@ -80,9 +74,7 @@ function* traverseRuleChild(
   }
 }
 
-function* traverseBackground(
-  backgorund: messages.GherkinDocument.Feature.IBackground
-) {
+function* traverseBackground(backgorund: messages.Background) {
   yield backgorund;
 
   if (backgorund.location) {
@@ -96,9 +88,7 @@ function* traverseBackground(
   }
 }
 
-function* traverseScenario(
-  scenario: messages.GherkinDocument.Feature.IScenario
-) {
+function* traverseScenario(scenario: messages.Scenario) {
   yield scenario;
 
   if (scenario.location) {
@@ -118,7 +108,7 @@ function* traverseScenario(
   }
 }
 
-function* traverseStep(step: messages.GherkinDocument.Feature.IStep) {
+function* traverseStep(step: messages.Step) {
   yield step;
 
   if (step.location) {
@@ -134,9 +124,7 @@ function* traverseStep(step: messages.GherkinDocument.Feature.IStep) {
   }
 }
 
-function* traverseDocString(
-  docString: messages.GherkinDocument.Feature.Step.IDocString
-) {
+function* traverseDocString(docString: messages.DocString) {
   yield docString;
 
   if (docString.location) {
@@ -144,9 +132,7 @@ function* traverseDocString(
   }
 }
 
-function* traverseDataTable(
-  dataTable: messages.GherkinDocument.Feature.Step.IDataTable
-) {
+function* traverseDataTable(dataTable: messages.DataTable) {
   yield dataTable;
 
   if (dataTable.location) {
@@ -160,7 +146,7 @@ function* traverseDataTable(
   }
 }
 
-function* traverseRow(row: messages.GherkinDocument.Feature.ITableRow) {
+function* traverseRow(row: messages.TableRow) {
   yield row;
 
   if (row.location) {
@@ -174,9 +160,7 @@ function* traverseRow(row: messages.GherkinDocument.Feature.ITableRow) {
   }
 }
 
-function* traverseCell(
-  cell: messages.GherkinDocument.Feature.TableRow.ITableCell
-) {
+function* traverseCell(cell: messages.TableCell) {
   yield cell;
 
   if (cell.location) {
@@ -184,9 +168,7 @@ function* traverseCell(
   }
 }
 
-function* traverseExample(
-  example: messages.GherkinDocument.Feature.Scenario.IExamples
-) {
+function* traverseExample(example: messages.Examples) {
   yield example;
 
   if (example.location) {
@@ -205,7 +187,7 @@ function* traverseExample(
 }
 
 export function collectTagNames(
-  tags: messages.GherkinDocument.Feature.ITag[] | null | undefined
+  tags: readonly (messages.Tag | messages.PickleTag)[] | null | undefined
 ) {
   return (
     tags?.map((tag) =>
