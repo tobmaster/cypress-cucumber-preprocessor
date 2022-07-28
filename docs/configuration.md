@@ -25,6 +25,18 @@ The preprocessor uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig
 }
 ```
 
+## Caveats / Debugging
+
+Notice that configuration, when `package.json` is used, **must** be placed within the `"cypress-cucumber-preprocessor": { .. }` block. This does not apply if EG. `.cypress-cucumber-preprocessorrc.json` is used, as this is a file solely dedicated to preprocessor configuration, while `package.json` is not.
+
+If you place configuration values in multiple locations, *only one* of them will apply and take affect. The implication of this is that if you have an empty `"cypress-cucumber-preprocessor": { .. }` block within your `package.json` and try to write another configuration file, then you will be surprised to find that nothing seems to work.
+
+If you're unsure of what configuration values is actually being applied, then you can run Cypress with the following to enable debug output which will tell you.
+
+```
+$ DEBUG=cypress:electron,cypress-configuration,cypress-cucumber-preprocessor cypress run
+```
+
 ## Configuration overrides
 
 Configuration options can be overriden using (Cypress-) [environment variable](https://docs.cypress.io/guides/guides/environment-variables). The `filterSpecs` options (described in [docs/tags.md](tags.md)) can for instance be overriden by running Cypress like shown below.
