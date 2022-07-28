@@ -442,7 +442,6 @@ function createPickle(
                   status:
                     Status.Passed as unknown as messages.TestStepResultStatus,
                   duration: duration(start, end),
-                  willBeRetried: false,
                 },
                 timestamp: end,
               },
@@ -540,7 +539,6 @@ function createPickle(
                     status:
                       Status.Pending as unknown as messages.TestStepResultStatus,
                     duration: duration(start, end),
-                    willBeRetried: false,
                   },
                   timestamp: end,
                 },
@@ -569,7 +567,6 @@ function createPickle(
                     testStepResult: {
                       status:
                         Status.Skipped as unknown as messages.TestStepResultStatus,
-                      willBeRetried: false,
                       duration: {
                         seconds: 0,
                         nanos: 0,
@@ -594,7 +591,6 @@ function createPickle(
                     status:
                       Status.Passed as unknown as messages.TestStepResultStatus,
                     duration: duration(start, end),
-                    willBeRetried: false,
                   },
                   timestamp: end,
                 },
@@ -753,7 +749,6 @@ export default function createTests(
                   seconds: 0,
                   nanos: 0,
                 },
-                willBeRetried: false,
               },
               timestamp: endTimestamp,
             },
@@ -771,7 +766,6 @@ export default function createTests(
                   seconds: 0,
                   nanos: 0,
                 },
-                willBeRetried: false,
               },
               timestamp: endTimestamp,
             },
@@ -804,7 +798,6 @@ export default function createTests(
                 seconds: 0,
                 nanos: 0,
               },
-              willBeRetried: false,
             },
             timestamp: endTimestamp,
           },
@@ -816,6 +809,7 @@ export default function createTests(
       testCaseFinished: {
         testCaseStartedId,
         timestamp: endTimestamp,
+        willBeRetried: false,
       },
     });
 
