@@ -7,6 +7,7 @@
 * [Step definitions](step-definitions.md)
 * [Tags](tags.md)
 * [JSON report](json-report.md)
+* [HTML report](html-report.md)
 * [Localisation](localisation.md)
 * [Configuration](configuration.md)
 * [Test configuration](test-configuration.md)

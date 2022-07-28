@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 - Updated all `@cucumber/*` dependencies.
 
+- Added native support for HTML reports using `@cucumber/html-formatter`, fixes [#780](https://github.com/badeball/cypress-cucumber-preprocessor/issues/780).
+
 ## v11.5.1
 
 - Expose member `getStepDefinitionPatterns`.

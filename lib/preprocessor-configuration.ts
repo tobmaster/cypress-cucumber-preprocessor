@@ -119,6 +119,37 @@ function validateConfigurationEntry(
       };
       return { [key]: messagesConfig };
     }
+    case "html": {
+      if (typeof value !== "object" || value == null) {
+        throw new Error(
+          `Expected an object (json), but got ${util.inspect(value)}`
+        );
+      }
+      let args: string[] | undefined;
+      if (
+        !hasOwnProperty(value, "enabled") ||
+        typeof value.enabled !== "boolean"
+      ) {
+        throw new Error(
+          `Expected a boolean (html.enabled), but got ${util.inspect(value)}`
+        );
+      }
+      let output: string | undefined;
+      if (hasOwnProperty(value, "output")) {
+        if (isString(value.output)) {
+          output = value.output;
+        } else {
+          throw new Error(
+            `Expected a string (html.output), but got ${util.inspect(value)}`
+          );
+        }
+      }
+      const messagesConfig = {
+        enabled: value.enabled,
+        output,
+      };
+      return { [key]: messagesConfig };
+    }
     case "filterSpecs": {
       if (!isBoolean(value)) {
         throw new Error(
@@ -243,6 +274,32 @@ function validateEnvironmentOverrides(
     }
   }
 
+  if (hasOwnProperty(environment, "htmlEnabled")) {
+    const { htmlEnabled } = environment;
+
+    if (isBoolean(htmlEnabled)) {
+      overrides.htmlEnabled = htmlEnabled;
+    } else if (isString(htmlEnabled)) {
+      overrides.htmlEnabled = stringToMaybeBoolean(htmlEnabled);
+    } else {
+      throw new Error(
+        `Expected a boolean (htmlEnabled), but got ${util.inspect(htmlEnabled)}`
+      );
+    }
+  }
+
+  if (hasOwnProperty(environment, "htmlOutput")) {
+    const { htmlOutput } = environment;
+
+    if (isString(htmlOutput)) {
+      overrides.htmlOutput = htmlOutput;
+    } else {
+      throw new Error(
+        `Expected a string (htmlOutput), but got ${util.inspect(htmlOutput)}`
+      );
+    }
+  }
+
   if (hasOwnProperty(environment, "filterSpecs")) {
     const { filterSpecs } = environment;
 
@@ -302,6 +359,10 @@ export interface IPreprocessorConfiguration {
     formatter?: string;
     output?: string;
   };
+  readonly html?: {
+    enabled: boolean;
+    output?: string;
+  };
   readonly filterSpecs?: boolean;
   readonly omitFiltered?: boolean;
 }
@@ -314,6 +375,8 @@ export interface IEnvironmentOverrides {
   jsonEnabled?: boolean;
   jsonFormatter?: string;
   jsonOutput?: string;
+  htmlEnabled?: boolean;
+  htmlOutput?: string;
   filterSpecs?: boolean;
   omitFiltered?: boolean;
 }
@@ -364,6 +427,7 @@ export class PreprocessorConfiguration implements IPreprocessorConfiguration {
     return {
       enabled:
         this.json.enabled ||
+        this.html.enabled ||
         (this.environmentOverrides.messagesEnabled ??
           this.explicitValues.messages?.enabled ??
           false),
@@ -391,6 +455,19 @@ export class PreprocessorConfiguration implements IPreprocessorConfiguration {
       output:
         this.environmentOverrides.jsonOutput ??
         (this.explicitValues.json?.output || "cucumber-report.json"),
+    };
+  }
+
+  get html() {
+    return {
+      enabled:
+        this.environmentOverrides.htmlEnabled ??
+        this.explicitValues.html?.enabled ??
+        false,
+      output:
+        this.environmentOverrides.htmlOutput ??
+        this.explicitValues.html?.output ??
+        "cucumber-report.html",
     };
   }
 

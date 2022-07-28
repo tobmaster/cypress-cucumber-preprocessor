@@ -4,7 +4,15 @@ import path from "path";
 
 import child_process from "child_process";
 
+import stream from "stream";
+
 import chalk from "chalk";
+
+import resolvePkg from "resolve-pkg";
+
+import { NdjsonToMessageStream } from "@cucumber/message-streams";
+
+import CucumberHtmlStream from "@cucumber/html-formatter";
 
 import messages, { IdGenerator, SourceMediaType } from "@cucumber/messages";
 
@@ -80,7 +88,7 @@ export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
 export async function afterRunHandler(config: Cypress.PluginConfigOptions) {
   const preprocessor = await resolve(config, config.env);
 
-  if (!preprocessor.json.enabled) {
+  if (!preprocessor.json.enabled && !preprocessor.html.enabled) {
     return;
   }
 
@@ -89,50 +97,88 @@ export async function afterRunHandler(config: Cypress.PluginConfigOptions) {
     preprocessor.messages.output
   );
 
-  const jsonPath = ensureIsAbsolute(
-    config.projectRoot,
-    preprocessor.json.output
-  );
-
   try {
     await fs.access(messagesPath, fsConstants.F_OK);
   } catch {
     return;
   }
 
-  await fs.mkdir(path.dirname(jsonPath), { recursive: true });
+  if (preprocessor.json.enabled) {
+    const jsonPath = ensureIsAbsolute(
+      config.projectRoot,
+      preprocessor.json.output
+    );
 
-  const messages = await fs.open(messagesPath, "r");
+    await fs.mkdir(path.dirname(jsonPath), { recursive: true });
 
-  try {
-    const json = await fs.open(jsonPath, "w");
+    const messages = await fs.open(messagesPath, "r");
 
     try {
-      const { formatter, args } = preprocessor.json;
-      const child = child_process.spawn(formatter, args, {
-        stdio: [messages.fd, json.fd, "inherit"],
-      });
+      const json = await fs.open(jsonPath, "w");
 
-      await new Promise<void>((resolve, reject) => {
-        child.on("exit", (code) => {
-          if (code === 0) {
-            resolve();
-          } else {
-            reject(
-              new Error(
-                `${preprocessor.json.formatter} exited non-successfully`
-              )
-            );
-          }
+      try {
+        const { formatter, args } = preprocessor.json;
+        const child = child_process.spawn(formatter, args, {
+          stdio: [messages.fd, json.fd, "inherit"],
         });
 
-        child.on("error", reject);
-      });
+        await new Promise<void>((resolve, reject) => {
+          child.on("exit", (code) => {
+            if (code === 0) {
+              resolve();
+            } else {
+              reject(
+                new Error(
+                  `${preprocessor.json.formatter} exited non-successfully`
+                )
+              );
+            }
+          });
+
+          child.on("error", reject);
+        });
+      } finally {
+        await json.close();
+      }
     } finally {
-      await json.close();
+      await messages.close();
     }
-  } finally {
-    await messages.close();
+  }
+
+  if (preprocessor.html.enabled) {
+    const htmlPath = ensureIsAbsolute(
+      config.projectRoot,
+      preprocessor.html.output
+    );
+
+    await fs.mkdir(path.dirname(htmlPath), { recursive: true });
+
+    const input = syncFs.createReadStream(messagesPath);
+
+    const output = syncFs.createWriteStream(htmlPath);
+
+    console.log("I am invoked!");
+
+    await new Promise<void>((resolve, reject) => {
+      stream.pipeline(
+        input,
+        new NdjsonToMessageStream(),
+        new CucumberHtmlStream(
+          resolvePkg("@cucumber/html-formatter", { cwd: __dirname }) +
+            "/dist/main.css",
+          resolvePkg("@cucumber/html-formatter", { cwd: __dirname }) +
+            "/dist/main.js"
+        ),
+        output,
+        (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        }
+      );
+    });
   }
 }
 

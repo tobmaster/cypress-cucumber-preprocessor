@@ -55,13 +55,15 @@ Every configuration option has a similar key which can be use to override it, sh
 
 | JSON path          | Environment key   | Example(s)                               |
 |--------------------|-------------------|------------------------------------------|
-| `stepDefinitions`  | `stepDefinitions` | `[filepath].{js,ts}` |
+| `stepDefinitions`  | `stepDefinitions` | `[filepath].{js,ts}`                     |
 | `messages.enabled` | `messagesEnabled` | `true`, `false`                          |
 | `messages.output`  | `messagesOutput`  | `cucumber-messages.ndjson`               |
 | `json.enabled`     | `jsonEnabled`     | `true`, `false`                          |
 | `json.formatter`   | `jsonFormatter`   | `/usr/bin/cucumber-json-formatter`       |
 | `json.args     `   | `jsonArgs     `   | `["custom-json-formatter.js"]`           |
 | `json.output`      | `jsonOutput`      | `cucumber-report.json`                   |
+| `html.enabled`     | `htmlEnabled`     | `true`, `false`                          |
+| `html.output`      | `htmlOutput`      | `cucumber-report.html`                   |
 | `filterSpecs`      | `filterSpecs`     | `true`, `false`                          |
 | `omitFiltered`     | `omitFiltered`    | `true`, `false`                          |
 
