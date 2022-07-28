@@ -1,4 +1,4 @@
-import { messages } from "@cucumber/messages";
+import messages from "@cucumber/messages";
 
 import parse from "@cucumber/tag-expressions";
 
@@ -44,13 +44,13 @@ type Node = ReturnType<typeof parse>;
 
 interface CompositionContext {
   registry: Registry;
-  gherkinDocument: messages.IGherkinDocument;
-  pickles: messages.IPickle[];
+  gherkinDocument: messages.GherkinDocument;
+  pickles: messages.Pickle[];
   testFilter: Node;
   omitFiltered: boolean;
   messages: {
     enabled: boolean;
-    stack: messages.IEnvelope[];
+    stack: messages.Envelope[];
   };
   stepDefinitionHints: {
     stepDefinitions: string[];
@@ -72,18 +72,18 @@ const Status = {
   Failed: "FAILED" as unknown as 6,
 };
 
-const sourceReference: messages.ISourceReference = {
+const sourceReference: messages.SourceReference = {
   uri: "not available",
   location: { line: 0 },
 };
 
 interface IStep {
   hook?: IHook;
-  pickleStep?: messages.Pickle.IPickleStep;
+  pickleStep?: messages.PickleStep;
 }
 
 export interface InternalProperties {
-  pickle: messages.IPickle;
+  pickle: messages.Pickle;
   testCaseStartedId: string;
   currentStep?: IStep;
   allSteps: IStep[];
@@ -103,9 +103,7 @@ function findPickleById(context: CompositionContext, astId: string) {
   );
 }
 
-function collectExampleIds(
-  examples: messages.GherkinDocument.Feature.Scenario.IExamples[]
-) {
+function collectExampleIds(examples: readonly messages.Examples[]) {
   return examples
     .map((examples) => {
       return assertAndReturn(
@@ -168,10 +166,7 @@ function stripIndent(content: string) {
   return content.replace(regex, "");
 }
 
-function createFeature(
-  context: CompositionContext,
-  feature: messages.GherkinDocument.IFeature
-) {
+function createFeature(context: CompositionContext, feature: messages.Feature) {
   describe(feature.name || "<unamed feature>", () => {
     if (feature.children) {
       for (const child of feature.children) {
@@ -185,10 +180,7 @@ function createFeature(
   });
 }
 
-function createRule(
-  context: CompositionContext,
-  rule: messages.GherkinDocument.Feature.FeatureChild.IRule
-) {
+function createRule(context: CompositionContext, rule: messages.Rule) {
   const picklesWithinRule = rule.children
     ?.map((child) => child.scenario)
     .filter(notNull)
@@ -249,7 +241,7 @@ function createWeakCache<K extends object, V>(mapper: (key: K) => V) {
 }
 
 const gherkinDocumentsAstIdMaps = createWeakCache(
-  (key: messages.IGherkinDocument) => {
+  (key: messages.GherkinDocument) => {
     const astIdMap = new Map<
       string,
       YieldType<ReturnType<typeof traverseGherkinDocument>>
@@ -267,7 +259,7 @@ const gherkinDocumentsAstIdMaps = createWeakCache(
 
 function createScenario(
   context: CompositionContext,
-  scenario: messages.GherkinDocument.Feature.IScenario
+  scenario: messages.Scenario
 ) {
   if (scenario.examples) {
     const exampleIds = collectExampleIds(scenario.examples);
@@ -297,8 +289,8 @@ function createScenario(
 
 function createPickle(
   context: CompositionContext,
-  scenario: messages.GherkinDocument.Feature.IScenario,
-  pickle: messages.IPickle
+  scenario: messages.Scenario,
+  pickle: messages.Pickle
 ) {
   const { registry, gherkinDocument, pickles, testFilter, messages } = context;
   const testCaseId = uuid();
@@ -321,14 +313,14 @@ function createPickle(
         id,
         pattern: {
           source: "a step",
-          type: "CUCUMBER_EXPRESSION" as unknown as messages.StepDefinition.StepDefinitionPattern.StepDefinitionPatternType,
+          type: "CUCUMBER_EXPRESSION" as unknown as messages.StepDefinitionPatternType.CUCUMBER_EXPRESSION,
         },
         sourceReference,
       },
     });
   }
 
-  const testSteps: messages.TestCase.ITestStep[] = [];
+  const testSteps: messages.TestStep[] = [];
 
   for (const beforeHook of beforeHooks) {
     testSteps.push({
@@ -447,8 +439,10 @@ function createPickle(
                 testStepId: hook.id,
                 testCaseStartedId,
                 testStepResult: {
-                  status: Status.Passed,
+                  status:
+                    Status.Passed as unknown as messages.TestStepResultStatus,
                   duration: duration(start, end),
+                  willBeRetried: false,
                 },
                 timestamp: end,
               },
@@ -543,8 +537,10 @@ function createPickle(
                   testStepId: pickleStep.id,
                   testCaseStartedId,
                   testStepResult: {
-                    status: Status.Pending,
+                    status:
+                      Status.Pending as unknown as messages.TestStepResultStatus,
                     duration: duration(start, end),
+                    willBeRetried: false,
                   },
                   timestamp: end,
                 },
@@ -562,6 +558,7 @@ function createPickle(
                   testStepStarted: {
                     testStepId,
                     testCaseStartedId,
+                    timestamp: createTimestamp(),
                   },
                 });
 
@@ -570,8 +567,15 @@ function createPickle(
                     testStepId,
                     testCaseStartedId,
                     testStepResult: {
-                      status: Status.Skipped,
+                      status:
+                        Status.Skipped as unknown as messages.TestStepResultStatus,
+                      willBeRetried: false,
+                      duration: {
+                        seconds: 0,
+                        nanos: 0,
+                      },
                     },
+                    timestamp: createTimestamp(),
                   },
                 });
               }
@@ -587,8 +591,10 @@ function createPickle(
                   testStepId: pickleStep.id,
                   testCaseStartedId,
                   testStepResult: {
-                    status: Status.Passed,
+                    status:
+                      Status.Passed as unknown as messages.TestStepResultStatus,
                     duration: duration(start, end),
+                    willBeRetried: false,
                   },
                   timestamp: end,
                 },
@@ -603,7 +609,7 @@ function createPickle(
 }
 
 function collectTagNamesFromGherkinDocument(
-  gherkinDocument: messages.IGherkinDocument
+  gherkinDocument: messages.GherkinDocument
 ) {
   const tagNames: string[] = [];
 
@@ -619,8 +625,8 @@ function collectTagNamesFromGherkinDocument(
 export default function createTests(
   registry: Registry,
   source: string,
-  gherkinDocument: messages.IGherkinDocument,
-  pickles: messages.IPickle[],
+  gherkinDocument: messages.GherkinDocument,
+  pickles: messages.Pickle[],
   messagesEnabled: boolean,
   omitFiltered: boolean,
   stepDefinitionHints: {
@@ -631,10 +637,18 @@ export default function createTests(
 ) {
   const noopNode = { evaluate: () => true };
   const environmentTags = getTags(Cypress.env());
-  const messages: messages.IEnvelope[] = [];
+  const messages: messages.Envelope[] = [];
 
   messages.push({
-    source: { data: source, uri: gherkinDocument.uri },
+    source: {
+      data: source,
+      uri: assertAndReturn(
+        gherkinDocument.uri,
+        "Expected gherkin document to have URI"
+      ),
+      mediaType:
+        "text/x.cucumber.gherkin+plain" as messages.SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN,
+    },
   });
 
   messages.push({
@@ -700,6 +714,8 @@ export default function createTests(
 
     const { testCaseStartedId, remainingSteps } = properties;
 
+    const endTimestamp = createTimestamp();
+
     if (
       remainingSteps.length > 0 &&
       (this.currentTest?.state as any) !== "pending"
@@ -723,7 +739,7 @@ export default function createTests(
         "Expected a step to either be a hook or a pickleStep"
       );
 
-      const failedTestStepFinished: messages.IEnvelope = error.includes(
+      const failedTestStepFinished: messages.Envelope = error.includes(
         "Step implementation missing"
       )
         ? {
@@ -731,8 +747,15 @@ export default function createTests(
               testStepId,
               testCaseStartedId,
               testStepResult: {
-                status: Status.Undefined,
+                status:
+                  Status.Undefined as unknown as messages.TestStepResultStatus,
+                duration: {
+                  seconds: 0,
+                  nanos: 0,
+                },
+                willBeRetried: false,
               },
+              timestamp: endTimestamp,
             },
           }
         : {
@@ -740,10 +763,17 @@ export default function createTests(
               testStepId,
               testCaseStartedId,
               testStepResult: {
-                status: Status.Failed,
+                status:
+                  Status.Failed as unknown as messages.TestStepResultStatus,
                 message: this.currentTest?.err?.message,
+                // TODO: Create a proper duration from when the step started.
+                duration: {
+                  seconds: 0,
+                  nanos: 0,
+                },
+                willBeRetried: false,
               },
-              timestamp: createTimestamp(),
+              timestamp: endTimestamp,
             },
           };
 
@@ -759,6 +789,7 @@ export default function createTests(
           testStepStarted: {
             testStepId,
             testCaseStartedId,
+            timestamp: endTimestamp,
           },
         });
 
@@ -767,8 +798,15 @@ export default function createTests(
             testStepId,
             testCaseStartedId,
             testStepResult: {
-              status: Status.Skipped,
+              status:
+                Status.Skipped as unknown as messages.TestStepResultStatus,
+              duration: {
+                seconds: 0,
+                nanos: 0,
+              },
+              willBeRetried: false,
             },
+            timestamp: endTimestamp,
           },
         });
       }
@@ -777,7 +815,7 @@ export default function createTests(
     messages.push({
       testCaseFinished: {
         testCaseStartedId,
-        timestamp: createTimestamp(),
+        timestamp: endTimestamp,
       },
     });
 

@@ -1,4 +1,4 @@
-import { messages } from "@cucumber/messages";
+import messages from "@cucumber/messages";
 
 import { assert, assertAndReturn } from "./assertions";
 
@@ -12,9 +12,7 @@ function zip<A, B>(collectionA: A[], collectionB: B[]) {
 export default class DataTable {
   private readonly rawTable: string[][];
 
-  constructor(
-    sourceTable: messages.PickleStepArgument.IPickleTable | string[][]
-  ) {
+  constructor(sourceTable: messages.PickleTable | string[][]) {
     if (sourceTable instanceof Array) {
       this.rawTable = sourceTable;
     } else {

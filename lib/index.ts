@@ -1,4 +1,4 @@
-import { messages } from "@cucumber/messages";
+import messages from "@cucumber/messages";
 
 import DataTable from "./data_table";
 
@@ -13,9 +13,9 @@ import * as Methods from "./methods";
 declare global {
   interface Window {
     testState: {
-      gherkinDocument: messages.IGherkinDocument;
-      pickles: messages.IPickle[];
-      pickle: messages.IPickle;
+      gherkinDocument: messages.GherkinDocument;
+      pickles: messages.Pickle[];
+      pickle: messages.Pickle;
     };
   }
 }
