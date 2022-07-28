@@ -6,13 +6,11 @@ import child_process from "child_process";
 
 import chalk from "chalk";
 
-import messages from "@cucumber/messages";
+import messages, { IdGenerator, SourceMediaType } from "@cucumber/messages";
 
 import parse from "@cucumber/tag-expressions";
 
 import { generateMessages } from "@cucumber/gherkin";
-
-import { IdGenerator } from "@cucumber/messages";
 
 import {
   getTestFiles,
@@ -315,7 +313,12 @@ export default async function addCucumberPreprocessorPlugin(
         newId: IdGenerator.incrementing(),
       };
 
-      const envelopes = generateMessages(content, testFile, options);
+      const envelopes = generateMessages(
+        content,
+        testFile,
+        SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN,
+        options
+      );
 
       const pickles = envelopes
         .map((envelope) => envelope.pickle)

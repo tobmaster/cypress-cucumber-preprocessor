@@ -2,7 +2,7 @@ import path from "path";
 
 import { generateMessages } from "@cucumber/gherkin";
 
-import { IdGenerator } from "@cucumber/messages";
+import { IdGenerator, SourceMediaType } from "@cucumber/messages";
 
 import { ICypressConfiguration } from "@badeball/cypress-configuration";
 
@@ -36,7 +36,12 @@ export async function compile(
 
   const relativeUri = path.relative(configuration.projectRoot, uri);
 
-  const envelopes = generateMessages(data, relativeUri, options);
+  const envelopes = generateMessages(
+    data,
+    relativeUri,
+    SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN,
+    options
+  );
 
   if (envelopes[0].parseError) {
     throw new Error(

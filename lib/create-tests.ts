@@ -185,7 +185,7 @@ function createRule(context: CompositionContext, rule: messages.Rule) {
     ?.map((child) => child.scenario)
     .filter(notNull)
     .flatMap((scenario) => {
-      if (scenario.examples) {
+      if (scenario.examples.length > 0) {
         return collectExampleIds(scenario.examples).map((exampleId) => {
           return findPickleById(context, exampleId);
         });
@@ -261,7 +261,7 @@ function createScenario(
   context: CompositionContext,
   scenario: messages.Scenario
 ) {
-  if (scenario.examples) {
+  if (scenario.examples.length > 0) {
     const exampleIds = collectExampleIds(scenario.examples);
 
     for (let i = 0; i < exampleIds.length; i++) {
