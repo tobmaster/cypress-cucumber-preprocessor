@@ -20,9 +20,7 @@ You need to install `cucumber-json-formatter` **yourself**, as per [documentatio
 
 ## Why is `cypress-tags` missing?
 
-From [#689](https://github.com/badeball/cypress-cucumber-preprocessor/issues/689):
-
-> The `cypress-tags` has been removed and made redundant. Specs containing no matching scenarios are [automatically filtered](https://github.com/badeball/cypress-cucumber-preprocessor/blob/master/docs/tags.md#running-a-subset-of-scenarios), provided that `filterSpecs` is set to true.
+The `cypress-tags` executable has been removed and made redundant. Specs containing no matching scenarios are [automatically filtered](https://github.com/badeball/cypress-cucumber-preprocessor/blob/master/docs/tags.md#running-a-subset-of-scenarios), provided that `filterSpecs` is set to true.
 
 ## My JSON report isn't generated
 
