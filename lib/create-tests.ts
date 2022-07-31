@@ -53,7 +53,7 @@ interface CompositionContext {
     stack: messages.Envelope[];
   };
   stepDefinitionHints: {
-    stepDefinitions: string[];
+    stepDefinitions: string | string[];
     stepDefinitionPatterns: string[];
     stepDefinitionPaths: string[];
   };
@@ -894,7 +894,7 @@ function createMissingStepDefinitionMessage(
     .replaceAll("<text>", text)
     .replaceAll(
       "<step-definitions>",
-      prettyPrintList(stepDefinitionHints.stepDefinitions)
+      prettyPrintList([stepDefinitionHints.stepDefinitions].flat())
     )
     .replaceAll(
       "<step-definition-patterns>",

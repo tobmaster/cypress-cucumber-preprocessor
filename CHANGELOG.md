@@ -36,6 +36,8 @@ Other changes:
 
 - Added native support for HTML reports using `@cucumber/html-formatter`, fixes [#780](https://github.com/badeball/cypress-cucumber-preprocessor/issues/780).
 
+- Correct an issue with non-array `stepDefinitions`, fixes [#781](https://github.com/badeball/cypress-cucumber-preprocessor/issues/781).
+
 ## v11.5.1
 
 - Expose member `getStepDefinitionPatterns`.
