@@ -36,3 +36,9 @@ There's also a `[filepart]` option available. Given a configuration shown below
 * `cypress/e2e/foo/bar/step_definitions/**/*.{js,ts}`
 * `cypress/e2e/foo/step_definitions/**/*.{js,ts}`
 * `cypress/e2e/step_definitions/**/*.{js,ts}`
+
+## Caveats
+
+The library makes use of [glob](https://github.com/isaacs/node-glob) to turn patterns into a list of files. This has some implications, explained below (list is non-exhaustive and will be expanded on demand).
+
+* Single term inside braces, EG. `foo/bar.{js}`, doesn't work as you might expect, ref. https://github.com/isaacs/node-glob/issues/434.
