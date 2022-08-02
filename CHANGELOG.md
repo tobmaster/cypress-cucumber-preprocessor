@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 - Correct some path handling on Windows, fixes [#788](https://github.com/badeball/cypress-cucumber-preprocessor/issues/788).
 
+- Correct calculation of common ancestor path, even when specs are filtered, fixes [#785](https://github.com/badeball/cypress-cucumber-preprocessor/issues/785).
+
 ## v12.0.0
 
 Breaking changes:

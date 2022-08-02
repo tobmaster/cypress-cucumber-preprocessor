@@ -27,6 +27,7 @@ import {
 
 import {
   HOOK_FAILURE_EXPR,
+  INTERNAL_PROPERTY_NAME,
   TASK_APPEND_MESSAGES,
   TASK_CREATE_STRING_ATTACHMENT,
   TASK_TEST_STEP_STARTED,
@@ -268,6 +269,29 @@ type AddOptions = {
   omitAfterScreenshotHandler?: boolean;
 };
 
+type PreservedPluginConfigOptions = ICypressConfiguration & {
+  [INTERNAL_PROPERTY_NAME]?: Partial<ICypressConfiguration>;
+};
+
+export function mutateConfigObjectPreservingly<
+  K extends keyof ICypressConfiguration
+>(
+  config: PreservedPluginConfigOptions,
+  property: K,
+  value: PreservedPluginConfigOptions[K]
+) {
+  const preserved =
+    config[INTERNAL_PROPERTY_NAME] ?? (config[INTERNAL_PROPERTY_NAME] = {});
+  preserved[property] = config[property];
+  config[property] = value;
+}
+
+export function rebuildOriginalConfigObject(
+  config: PreservedPluginConfigOptions
+): ICypressConfiguration {
+  return Object.assign({}, config, config[INTERNAL_PROPERTY_NAME]);
+}
+
 export default async function addCucumberPreprocessorPlugin(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions,
@@ -345,9 +369,7 @@ export default async function addCucumberPreprocessorPlugin(
   if (tags !== null && preprocessor.filterSpecs) {
     const node = parse(tags);
 
-    const propertyName = "specPattern" in config ? "specPattern" : "testFiles";
-
-    (config as any)[propertyName] = getTestFiles(
+    const testFiles = getTestFiles(
       config as unknown as ICypressConfiguration
     ).filter((testFile) => {
       const content = syncFs.readFileSync(testFile).toString("utf-8");
@@ -374,6 +396,14 @@ export default async function addCucumberPreprocessorPlugin(
         node.evaluate(pickle.tags?.map((tag) => tag.name).filter(notNull) ?? [])
       );
     });
+
+    const propertyName = "specPattern" in config ? "specPattern" : "testFiles";
+
+    mutateConfigObjectPreservingly(
+      config,
+      propertyName as keyof ICypressConfiguration,
+      testFiles
+    );
   }
 
   return config;

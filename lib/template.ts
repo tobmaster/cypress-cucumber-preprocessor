@@ -24,6 +24,8 @@ import { notNull } from "./type-guards";
 
 import { ensureIsRelative } from "./helpers";
 
+import { rebuildOriginalConfigObject } from "./add-cucumber-preprocessor-plugin";
+
 const { stringify } = JSON;
 
 export async function compile(
@@ -32,6 +34,8 @@ export async function compile(
   data: string,
   uri: string = this.resourcePath
 ) {
+  configuration = rebuildOriginalConfigObject(configuration);
+
   const options = {
     includeSource: false,
     includeGherkinDocument: true,
