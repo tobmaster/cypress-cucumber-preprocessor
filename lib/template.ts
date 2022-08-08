@@ -65,7 +65,9 @@ export async function compile(
   const pickles = envelopes.map((envelope) => envelope.pickle).filter(notNull);
 
   const implicitIntegrationFolder = assertAndReturn(
-    ancestor(...getTestFiles(configuration).map(path.dirname)),
+    ancestor(
+      ...getTestFiles(configuration).map(path.dirname).map(path.normalize)
+    ),
     "Expected to find a common ancestor path"
   );
 

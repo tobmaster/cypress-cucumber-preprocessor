@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 - Allow overriding env using tags, fixes [#792](https://github.com/badeball/cypress-cucumber-preprocessor/issues/792).
 
+- Correct some path handling on Windows, fixes [#788](https://github.com/badeball/cypress-cucumber-preprocessor/issues/788).
+
 ## v12.0.0
 
 Breaking changes:
