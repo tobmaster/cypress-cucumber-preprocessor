@@ -373,14 +373,20 @@ function createPickle(
     remainingSteps: [...steps],
   };
 
-  const env = { [INTERNAL_PROPERTY_NAME]: internalProperties };
+  const internalEnv = { [INTERNAL_PROPERTY_NAME]: internalProperties };
 
   const suiteOptions = tags
     .filter(looksLikeOptions)
     .map(tagToCypressOptions)
     .reduce(Object.assign, {});
 
-  it(scenarioName, { env, ...suiteOptions }, function () {
+  if (suiteOptions.env) {
+    Object.assign(suiteOptions.env, internalEnv);
+  } else {
+    suiteOptions.env = internalEnv;
+  }
+
+  it(scenarioName, suiteOptions, function () {
     const { remainingSteps, testCaseStartedId } = retrieveInternalProperties();
 
     assignRegistry(registry);
