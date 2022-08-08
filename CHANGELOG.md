@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v12.0.1
 
 - Allow overriding env using tags, fixes [#792](https://github.com/badeball/cypress-cucumber-preprocessor/issues/792).
 
