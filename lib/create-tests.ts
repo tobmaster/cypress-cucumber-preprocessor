@@ -673,6 +673,12 @@ export default function createTests(
     });
   }
 
+  messages.push({
+    testRunStarted: {
+      timestamp: createTimestamp(),
+    },
+  });
+
   const tagsInDocument = collectTagNamesFromGherkinDocument(gherkinDocument);
 
   const testFilter =
@@ -826,6 +832,16 @@ export default function createTests(
   });
 
   after(function () {
+    messages.push({
+      testRunFinished: {
+        /**
+         * We're missing a "success" attribute here, but cucumber-js doesn't output it, so I won't.
+         * Mostly because I don't want to look into the semantics of it right now.
+         */
+        timestamp: createTimestamp(),
+      } as messages.TestRunFinished,
+    });
+
     if (messagesEnabled) {
       cy.task(TASK_APPEND_MESSAGES, messages, { log: false });
     }
