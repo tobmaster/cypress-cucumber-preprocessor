@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 - Start time and execution time is shown in HTML reports, fixes [#798](https://github.com/badeball/cypress-cucumber-preprocessor/issues/798).
 
+- Add current step information to `window.testState`, fixes [#800](https://github.com/badeball/cypress-cucumber-preprocessor/issues/800).
+
 ## v12.0.1
 
 - Allow overriding env using tags, fixes [#792](https://github.com/badeball/cypress-cucumber-preprocessor/issues/792).

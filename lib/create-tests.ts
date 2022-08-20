@@ -407,6 +407,8 @@ function createPickle(
 
     for (const step of steps) {
       if (step.hook) {
+        delete window.testState.pickleStep;
+
         const hook = step.hook;
 
         cy.then(() => {
@@ -455,6 +457,8 @@ function createPickle(
             remainingSteps.shift();
           });
       } else if (step.pickleStep) {
+        window.testState.pickleStep = step.pickleStep;
+
         const pickleStep = step.pickleStep;
 
         const text = assertAndReturn(
