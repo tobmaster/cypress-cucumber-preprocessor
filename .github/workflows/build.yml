@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.npm
-          key: npm@${{ matrix.cypress-version }}
+          key: npm-linux@${{ matrix.cypress-version }}
       - name: Cache TypeScript installs
         uses: actions/cache@v2
         with:
@@ -40,7 +40,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/Cypress
-          key: cypress@${{ matrix.cypress-version }}
+          key: cypress-linux@${{ matrix.cypress-version }}
       - name: Change owner
         run: "chown root: ."
       - name: Dependencies
@@ -65,6 +65,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Cache NPM modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: npm-window
+      - name: Cache Cypress binaries
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-window
       - name: Dependencies
         shell: bash
         env:
