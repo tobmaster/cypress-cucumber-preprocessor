@@ -22,5 +22,6 @@
     "browserify.ts",
     "esbuild.ts",
     "webpack.ts"
-  ]
+  ],
+  "exclude": ["lib/index.test-d.ts"]
 }

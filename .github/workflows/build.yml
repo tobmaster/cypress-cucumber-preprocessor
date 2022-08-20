@@ -31,11 +31,6 @@ jobs:
         with:
           path: ~/.npm
           key: npm@${{ matrix.cypress-version }}
-      - name: Cache TypeScript installs
-        uses: actions/cache@v2
-        with:
-          path: ~/.dts
-          key: dts
       - name: Cache Cypress binaries
         uses: actions/cache@v2
         with:
