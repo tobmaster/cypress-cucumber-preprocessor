@@ -16,6 +16,7 @@ declare global {
       gherkinDocument: messages.GherkinDocument;
       pickles: messages.Pickle[];
       pickle: messages.Pickle;
+      pickleStep?: messages.PickleStep;
     };
   }
 }

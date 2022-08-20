@@ -112,3 +112,4 @@ After({ tags: "foo" }, function () {
 expectType<messages.GherkinDocument>(window.testState.gherkinDocument);
 expectType<messages.Pickle[]>(window.testState.pickles);
 expectType<messages.Pickle>(window.testState.pickle);
+expectType<messages.PickleStep | undefined>(window.testState.pickleStep);

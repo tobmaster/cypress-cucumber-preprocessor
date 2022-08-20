@@ -49,3 +49,20 @@ Feature: window.testState
       """
     When I run cypress
     Then it passes
+
+  Scenario: pickleStep
+    Given a file named "cypress/e2e/a.feature" with:
+      """
+      Feature: a feature name
+        Scenario: a scenario name
+          Given a step
+      """
+    And a file named "cypress/e2e/a.js" with:
+      """
+      const { Given } = require("@badeball/cypress-cucumber-preprocessor");
+      Given("a step", function() {
+        expect(testState.pickleStep.text).to.equal("a step");
+      });
+      """
+    When I run cypress
+    Then it passes
