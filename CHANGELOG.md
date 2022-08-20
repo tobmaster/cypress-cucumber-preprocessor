@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v12.1.0
 
 - Start time and execution time is shown in HTML reports, fixes [#798](https://github.com/badeball/cypress-cucumber-preprocessor/issues/798).
 
