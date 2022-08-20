@@ -32,7 +32,6 @@ import { getTags } from "./environment-helpers";
 import { notNull } from "./type-guards";
 
 import { looksLikeOptions, tagToCypressOptions } from "./tag-parser";
-import { Context } from "mocha";
 
 declare global {
   namespace globalThis {
