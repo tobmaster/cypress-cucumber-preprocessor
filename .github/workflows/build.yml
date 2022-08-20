@@ -30,12 +30,12 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.npm
-          key: npm@${{ matrix.cypress-version }}
+          key: npm-linux@${{ matrix.cypress-version }}
       - name: Cache Cypress binaries
         uses: actions/cache@v2
         with:
           path: ~/.cache/Cypress
-          key: cypress@${{ matrix.cypress-version }}
+          key: cypress-linux@${{ matrix.cypress-version }}
       - name: Change owner
         run: "chown root: ."
       - name: Dependencies
@@ -57,9 +57,22 @@ jobs:
 
   windows:
     runs-on: windows-latest
+    env:
+      NPM_CONFIG_CACHE: ${{ github.workspace }}/.npm
+      CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/.cypress
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Cache NPM modules
+        uses: actions/cache@v2
+        with:
+          path: .npm
+          key: npm-windows
+      - name: Cache Cypress binaries
+        uses: actions/cache@v2
+        with:
+          path: .cypress
+          key: cypress-windows
       - name: Dependencies
         shell: bash
         env:
