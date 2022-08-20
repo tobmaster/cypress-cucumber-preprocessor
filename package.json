@@ -1,6 +1,6 @@
 {
   "name": "@badeball/cypress-cucumber-preprocessor",
-  "version": "12.0.1",
+  "version": "12.1.0",
   "author": "Jonas Amundsen",
   "license": "MIT",
   "homepage": "https://github.com/badeball/cypress-cucumber-preprocessor",
