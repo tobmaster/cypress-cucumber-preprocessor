@@ -158,8 +158,6 @@ export async function afterRunHandler(config: Cypress.PluginConfigOptions) {
 
     const output = syncFs.createWriteStream(htmlPath);
 
-    console.log("I am invoked!");
-
     await new Promise<void>((resolve, reject) => {
       stream.pipeline(
         input,
